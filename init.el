@@ -58,14 +58,10 @@
   :ensure t
   :init (global-flycheck-mode))
 
-;; (global-display-line-numbers-mode)
 (dolist (mode '(text-mode-hook
                 prog-mode-hook
                 conf-mode-hook))
-  (add-hook mode (lambda ()
-                   (progn (display-line-numbers-mode 1)))
-      )
-)
+  (add-hook mode 'display-line-numbers-mode))
 
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
@@ -123,7 +119,15 @@
   :config
   (setq neo-window-width 30)  ;; 设置侧边栏的宽度
   (setq neo-smart-open t)
-  (setq neo-show-hidden-files t))
+  (setq neo-show-hidden-files t)
+  (setq neo-show-updir-line nil))
+
+(use-package magit
+  :ensure t)
+
+(add-hook 'magit-post-commit-hook 'neotree-refresh)
+
+(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 
 (add-hook 'neo-enter-hook
             (lambda ()
