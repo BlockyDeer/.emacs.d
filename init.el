@@ -17,6 +17,15 @@
 (eval-when-compile
   (require 'use-package))
 
+(setq
+     backup-by-copying t ; 自动备份
+     backup-directory-alist
+     '(("." . "~/.emacs_backup")) ; 自动备份在目录"~/.em_backup"下
+     delete-old-versions t ; 自动删除旧的备份文件
+     kept-new-versions 3 ; 保留最近的3个备份文件
+     kept-old-versions 1 ; 保留最早的1个备份文件
+     version-control t) ; 多次备份
+
 (use-package eglot
   :ensure t
   :hook ((go-mode . eglot-ensure)
@@ -60,6 +69,9 @@
 
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
+
+(global-set-key (kbd "C-h") 'backward-delete-char)
+(global-set-key (kbd "DEL") 'backward-delete-char)
 
 (defun my-c-c++-mode-hook ()
   "个人 C/C++ 模式下的缩进设置"
@@ -132,6 +144,23 @@
 
 (load (expand-file-name "ans-mode.el" user-emacs-directory))
 
+(use-package markdown-mode
+  :ensure t
+  :mode ("\\.md\\'" . markdown-mode))
+
+(use-package conf-mode
+  :ensure t
+  :mode ("\\.ini\\'" . conf-mode))
+
+(use-package yaml-mode
+  :ensure t
+  :mode ("\\.yml\\'" . yaml-mode)
+  :mode ("\\.yaml\\'" . yaml-mode))
+
+(use-package json-mode
+  :ensure t
+  :mode ("\\.json\\'" . json-mode))
+
 (provide 'init)
 ;;; init.el ends here
 
@@ -140,7 +169,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(tango-dark)))
+ '(custom-enabled-themes '(tango-dark))
+ '(package-selected-packages
+   '(json-mode yaml-mode rainbow-mode rainbow-delimiters neotree lsp-mode go-mode flycheck company)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
