@@ -17,6 +17,10 @@
 (eval-when-compile
   (require 'use-package))
 
+(use-package which-key
+  :ensure t)
+(which-key-mode)
+
 (setq
      backup-by-copying t ; 自动备份
      backup-directory-alist
@@ -37,17 +41,38 @@
          (c++-mode . lsp))
   :commands lsp)
 
+(use-package clang-format
+  :ensure t)
+
+(add-hook 'c-mode-hook
+          (lambda () (local-set-key (kbd "C-c f") 'clang-format-buffer)))
+
+(add-hook 'c++-mode-hook
+          (lambda () (local-set-key (kbd "C-c f") 'clang-format-buffer)))
+
+(add-hook 'go-mode-hook
+          (lambda () (local-set-key (kbd "C-c f") 'gofmt)))
+
 (defun company-go-mode-setup()
   "Create golang company backend."
   (setq-local company-backends '(
                                  company-capf
                                  company-dabbrev-code
                                  company-files)))
+
+(global-set-key (kbd "M-o") 'company-complete)
+
 (use-package go-mode
   :ensure t
   :hook (
          (before-save . gofmt-before-save)
          (go-mode . company-go-mode-setup)))
+
+(use-package go-gen-test
+  :ensure t)
+
+(use-package go-dlv
+  :ensure t)
 
 (use-package company
   :ensure t
@@ -58,13 +83,16 @@
   :ensure t
   :init (global-flycheck-mode))
 
+;; 配置 flycheck 使用 chktex
+(setq-default flycheck-latex-chktexrc "~/.chktexrc")
+
 (dolist (mode '(text-mode-hook
                 prog-mode-hook
                 conf-mode-hook))
   (add-hook mode 'display-line-numbers-mode))
 
 (setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
+(setq-default tab-width 8)
 
 (global-set-key (kbd "C-h") 'backward-delete-char)
 (global-set-key (kbd "DEL") 'backward-delete-char)
@@ -110,7 +138,7 @@
 ;; 绑定新功能到 C-a
 (global-set-key (kbd "C-a") 'my-move-beginning-of-line)
 
-(global-set-key (kbd "<f6>") 'recompile)
+(global-set-key (kbd "<f7>") 'repeat-complex-command)
 
 (use-package neotree
   :ensure t
@@ -165,17 +193,38 @@
   :ensure t
   :mode ("\\.json\\'" . json-mode))
 
+(load-theme 'tango-dark t)
+
+(defvar executable-path "./main"
+  "The path to the executable file.")
+
+(defun set-executable-path ()
+  "Prompt the user to set the path for the executable file."
+  (interactive)
+  (setq executable-path (read-file-name "")))
+
+(defun set-compile-command-for-golang ()
+  "Set the default command to compile for golang"
+  (setq-local compile-command "go build"))
+
+(require 'compile)
+(global-set-key (kbd "<f6>")
+                (lambda ()
+                  (interactive)
+                  (recompile)  ;; 进行构建
+                  (when my-executable-path
+                    (shell-command my-executable-path))  ;; 使用设置的路径运行可执行文件
+                  ))
+
 (provide 'init)
 ;;; init.el ends here
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(tango-dark))
  '(package-selected-packages
-   '(json-mode yaml-mode rainbow-mode rainbow-delimiters neotree lsp-mode go-mode flycheck company)))
+   '(clang-format yaml-mode which-key rainbow-mode rainbow-delimiters neotree magit lsp-mode json-mode go-gen-test go-dlv flycheck company auctex)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
