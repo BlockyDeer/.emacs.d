@@ -38,7 +38,9 @@
 (use-package lsp-mode
   :ensure t
   :hook ((go-mode . lsp)
-         (c++-mode . lsp))
+         (c++-mode . lsp)
+         (c-mode . lsp)
+         (python-mode . lsp))
   :commands lsp)
 
 (use-package clang-format
@@ -215,6 +217,14 @@
                   (when my-executable-path
                     (shell-command my-executable-path))  ;; 使用设置的路径运行可执行文件
                   ))
+
+;; Common Lisp支持
+(use-package slime
+  :ensure t
+  :init
+  (setq inferior-lisp-program "/usr/bin/sbcl")  ; 设置 SBCL 的路径
+  :config
+  (slime-setup))
 
 (provide 'init)
 ;;; init.el ends here
