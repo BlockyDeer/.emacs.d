@@ -8,3 +8,4 @@ elpa/
 *.elc
 .lock
 .emacs.desktop
+advance-words-count.el/

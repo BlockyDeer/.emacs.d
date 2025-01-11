@@ -1,5 +1,6 @@
-;;; 我的emacs配置 -- init.el
+;;; Commentary: 我的emacs配置 -- init.el
 
+;;; Code:
 (setq package-archives '(("gnu"    . "https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
                          ("nongnu" . "https://mirrors.tuna.tsinghua.edu.cn/elpa/nongnu/")
                          ("melpa"  . "https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
@@ -225,6 +226,30 @@
   (setq inferior-lisp-program "/usr/bin/sbcl")  ; 设置 SBCL 的路径
   :config
   (slime-setup))
+
+(defun my-pclip (str-val)
+  (interactive)
+  (if simpleclip-works (simpleclip-set-contents str-val)
+    (cond
+     ((eq system-type 'darwin)
+      (with-temp-buffer
+        (insert str-val)
+        (call-process-region (point-min) (point-max) "/usr/bin/pbcopy")))
+     ((eq system-type 'cygwin)
+      (with-temp-buffer
+        (insert str-val)
+        (call-process-region (point-min) (point-max) "putclip")))
+     ((memq system-type '(gnu gnu/linux gnu/kfreebsd))
+      (with-temp-buffer
+        (insert str-val)
+        (call-process-region (point-min) (point-max) "xsel" nil nil nil "--clipboard" "--input"))))))
+
+(use-package xclip
+  :ensure t)
+
+(when (not (display-graphic-p))
+  (require 'xclip)
+  (xclip-mode 1))
 
 (provide 'init)
 ;;; init.el ends here
