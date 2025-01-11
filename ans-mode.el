@@ -15,11 +15,14 @@
 
 ;; Define the regex patterns and corresponding faces
 (defvar ans-mode-font-lock-keywords
-  '(("#{\\([^}]+\\)}" . font-lock-keyword-face)  ;; Highlight #{xxx}
-    ("@{\\([^}]+\\)}" . font-lock-function-name-face))) ;; Highlight @{xxx}
+  '(("#{\\([^}]+\\)}" . font-lock-function-name-face)  ;; Highlight #{xxx}
+    ("\n[^ ]+ " . font-lock-doc-face) ;; 高亮说话人
+    ("#[^\n]*\n" . font-lock-comment-face)
+    ("@{\\([^}]+\\)}" . font-lock-function-name-face) ;; Highlight @{xxx}
+  ))
 
 ;; Automatically activate ans-mode for .ans files
 (add-to-list 'auto-mode-alist '("\\.ans\\'" . ans-mode))
 
 (provide 'ans-mode)
-;; ans-mode.el ends here
+;;; ans-mode.el ends here
