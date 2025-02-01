@@ -9,3 +9,7 @@ elpa/
 .lock
 .emacs.desktop
 advance-words-count.el/
+recentf
+rime
+url
+bookmarks

@@ -1,4 +1,4 @@
-;;; Commentary: 我的emacs配置 -- init.el
+;;; commentary: 我的emacs配置 -- init.el
 
 ;;; Code:
 (setq package-archives '(("gnu"    . "https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
@@ -7,7 +7,10 @@
 
 (package-initialize)
 
+(setq frame-title-format "%b - Ahoge Emacs")
+
 (menu-bar-mode -1)
+(tool-bar-mode -1)
 
 ;; 安装 use-package
 (unless (package-installed-p 'use-package)
@@ -18,9 +21,24 @@
 (eval-when-compile
   (require 'use-package))
 
+(use-package vlf
+  :ensure t)
+
+(use-package mini-frame
+  :ensure)
+(mini-frame-mode t)
+
+(use-package rime
+  :custom
+  (default-input-method "rime"))
+
 (use-package which-key
   :ensure t)
 (which-key-mode)
+
+(set-frame-font "FiraCode Nerd Font-16" nil t)
+(set-fontset-font t 'unicode (font-spec :family "Noto Color Emoji" :size 16))
+(set-fontset-font t '(#x2ff0 . #x9ffc) (font-spec :family "Noto Sans CJK SC" :size 26))
 
 (setq
      backup-by-copying t ; 自动备份
@@ -86,8 +104,9 @@
   :ensure t
   :init (global-flycheck-mode))
 
-;; 配置 flycheck 使用 chktex
-(setq-default flycheck-latex-chktexrc "~/.chktexrc")
+(use-package yasnippet
+  :ensure t)
+(yas-global-mode 1)
 
 (dolist (mode '(text-mode-hook
                 prog-mode-hook
@@ -101,7 +120,6 @@
 (global-set-key (kbd "DEL") 'backward-delete-char)
 
 (defun my-c-c++-mode-hook ()
-  "个人 C/C++ 模式下的缩进设置"
   (setq c-default-style "linux")    ;; 使用 Linux 风格的缩进（可选，可以改为 "bsd" 或 "gnu"）
   (setq c-basic-offset 8)           ;; 每层缩进使用 4 个空格
   (setq tab-width 8)                ;; Tab 键宽度设置为 4
@@ -137,28 +155,28 @@
     (progn
       (move-beginning-of-line 2)  ;; 第二次按下，跳到第一个非空白字符
       (setq my-move-beginning-of-line-count 0))))  ;; 重置计数
-
-;; 绑定新功能到 C-a
 (global-set-key (kbd "C-a") 'my-move-beginning-of-line)
 
 (global-set-key (kbd "<f7>") 'repeat-complex-command)
 
-(use-package neotree
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(mini-frame-show-parameters '((top . 10) (width . 0.7) (left . 0.5)))
+ '(package-selected-packages
+   '(rime cmake-mode clang-format yaml-mode which-key rainbow-mode rainbow-delimiters magit lsp-mode json-mode go-gen-test go-dlv flycheck company auctex)))
+
+(use-package treemacs
   :ensure t
-  :bind
-  ("<f8>" . neotree-toggle)  ;; 使用 F8 打开/关闭侧边栏
-  :config
-  (setq neo-window-width 30)  ;; 设置侧边栏的宽度
-  (setq neo-smart-open t)
-  (setq neo-show-hidden-files t)
-  (setq neo-show-updir-line nil))
+  :defer t)
+(global-set-key (kbd "<f8>") 'treemacs)
+
+(setq treemacs-show-hidden-files t)
 
 (use-package magit
   :ensure t)
-
-(add-hook 'magit-post-commit-hook 'neotree-refresh)
-
-(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 
 (add-hook 'neo-enter-hook
             (lambda ()
@@ -178,6 +196,7 @@
 (add-hook 'org-mode-hook #'rainbow-delimiters-mode)
 
 (load (expand-file-name "ans-mode.el" user-emacs-directory))
+(load (expand-file-name "dashboard.el" user-emacs-directory))
 
 (use-package markdown-mode
   :ensure t
@@ -227,22 +246,30 @@
   :config
   (slime-setup))
 
-(defun my-pclip (str-val)
-  (interactive)
-  (if simpleclip-works (simpleclip-set-contents str-val)
-    (cond
-     ((eq system-type 'darwin)
-      (with-temp-buffer
-        (insert str-val)
-        (call-process-region (point-min) (point-max) "/usr/bin/pbcopy")))
-     ((eq system-type 'cygwin)
-      (with-temp-buffer
-        (insert str-val)
-        (call-process-region (point-min) (point-max) "putclip")))
-     ((memq system-type '(gnu gnu/linux gnu/kfreebsd))
-      (with-temp-buffer
-        (insert str-val)
-        (call-process-region (point-min) (point-max) "xsel" nil nil nil "--clipboard" "--input"))))))
+;; Web 支持
+(use-package web-mode
+  :ensure t)
+(use-package emmet-mode
+  :ensure t)
+(use-package js2-mode
+  :ensure t)
+
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))  ;; HTML 文件
+(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))    ;; JavaScript 文件
+
+(add-hook 'web-mode-hook  (lambda () (emmet-mode t)))
+
+(add-hook 'web-mode-hook
+          (lambda ()
+            (when (equal web-mode-content-type "javascript")
+              (js2-mode))))
+
+(use-package cmake-mode
+  :ensure t)
+
+(use-package cmake-ide
+  :ensure t)
+(cmake-ide-setup)
 
 (use-package xclip
   :ensure t)
@@ -251,18 +278,14 @@
   (require 'xclip)
   (xclip-mode 1))
 
-(provide 'init)
-;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(clang-format yaml-mode which-key rainbow-mode rainbow-delimiters neotree magit lsp-mode json-mode go-gen-test go-dlv flycheck company auctex)))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(provide 'init)
+;;; init.el ends here
+
