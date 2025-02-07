@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: crefeq
+# key: crefeq
+# --
+$1 const &$2 = $3;

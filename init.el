@@ -30,7 +30,11 @@
 
 (use-package rime
   :custom
-  (default-input-method "rime"))
+  (default-input-method "rime")
+  :bind
+  (:map rime-mode-map
+        ("C-`" . 'rime-send-keybinding))
+  )
 
 (use-package which-key
   :ensure t)
@@ -61,6 +65,26 @@
          (c-mode . lsp)
          (python-mode . lsp))
   :commands lsp)
+
+(use-package comment-tags
+  :ensure t)
+(setq comment-tags-keymap-prefix (kbd "C-c t"))
+(with-eval-after-load "comment-tags"
+  (setq comment-tags-keyword-faces
+        `(("TODO" . ,(list :weight 'bold :foreground "#28ABE3"))
+          ("FIXME" . ,(list :weight 'bold :foreground "#DB3340"))
+          ("BUG" . ,(list :weight 'bold :foreground "#DB3340"))
+          ("HACK" . ,(list :weight 'bold :foreground "#E8B71A"))
+          ("KLUDGE" . ,(list :weight 'bold :foreground "#E8B71A"))
+          ("XXX" . ,(list :weight 'bold :foreground "#F7EAC8"))
+          ("INFO" . ,(list :weight 'bold :foreground "#F7EAC8"))
+          ("DONE" . ,(list :weight 'bold :foreground "#1FDA9A"))))
+  (setq comment-tags-comment-start-only t
+        comment-tags-require-colon t
+        comment-tags-case-sensitive t
+        comment-tags-show-faces t
+        comment-tags-lighter nil))
+(add-hook 'prog-mode-hook 'comment-tags-mode)
 
 (use-package clang-format
   :ensure t)
@@ -107,6 +131,8 @@
 (use-package yasnippet
   :ensure t)
 (yas-global-mode 1)
+(global-set-key (kbd "C-c i") 'yas-insert-snippet)
+(global-set-key (kbd "M-p") 'yas-expand)
 
 (dolist (mode '(text-mode-hook
                 prog-mode-hook
@@ -197,6 +223,7 @@
 
 (load (expand-file-name "ans-mode.el" user-emacs-directory))
 (load (expand-file-name "dashboard.el" user-emacs-directory))
+(load (expand-file-name "liga.el" user-emacs-directory))
 
 (use-package markdown-mode
   :ensure t

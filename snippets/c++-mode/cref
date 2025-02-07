@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: cref
+# key: cref
+# --
+${1:type} const &${2:var}
