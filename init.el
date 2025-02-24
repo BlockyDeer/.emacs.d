@@ -302,8 +302,10 @@
   (when (term-check-proc (current-buffer))
     (term-send-eof))
   (if (y-or-n-p "Buffer has a running process; kill it?")
-      (kill-buffer (current-buffer))
-    (message "Process not killed, buffer remains.")))
+      (progn
+        (kill-buffer (current-buffer))
+        (delete-window)
+    (message "Process not killed, buffer remains."))))
 
 ; C-d在能退出终端的时候清理掉Terminal buffer
 (add-hook 'term-mode-hook
