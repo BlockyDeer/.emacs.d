@@ -7,6 +7,10 @@
 
 (package-initialize)
 
+(defun load-el (path)
+  "Load single el file from user Emacs directory.  PATH: string, The file path."
+  (load (expand-file-name path user-emacs-directory)))
+
 (setq frame-title-format "%b - Ahoge Emacs")
 
 (menu-bar-mode -1)
@@ -44,9 +48,8 @@
   :ensure t)
 (which-key-mode)
 
-(set-frame-font "FiraCode Nerd Font-16" nil t)
-(set-fontset-font t 'unicode (font-spec :family "Noto Color Emoji" :size 16))
-(set-fontset-font t '(#x2ff0 . #x9ffc) (font-spec :family "Noto Sans CJK SC" :size 26))
+(load-el "font.el")
+(set-global-fonts "FiraCode Nerd Font-16" "Noto Sans CJK SC" "Noto Color Emoji")
 
 (setq
      backup-by-copying t ; 自动备份
@@ -199,10 +202,6 @@
 (use-package magit
   :ensure t)
 
-(add-hook 'neo-enter-hook
-            (lambda ()
-              (display-line-numbers-mode)))
-
 (electric-pair-mode 1)
 
 (use-package rainbow-mode
@@ -215,10 +214,6 @@
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'text-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'org-mode-hook #'rainbow-delimiters-mode)
-
-(defun load-el (path)
-  "Load single el file from user Emacs directory.  PATH: string, The file path."
-  (load (expand-file-name path user-emacs-directory)))
 
 (load-el "ans-mode.el")
 (load-el "dashboard.el")
