@@ -24,6 +24,10 @@
 (use-package vlf
   :ensure t)
 
+(use-package wc-mode
+  :ensure t)
+(add-hook 'wc-mode-hook (lambda () (local-set-key (kbd "C-c C-c") 'wc)))
+
 (use-package mini-frame
   :ensure)
 (mini-frame-mode t)
@@ -89,14 +93,16 @@
 (use-package clang-format
   :ensure t)
 
+(use-package format-all
+  :ensure t)
+(global-set-key (kbd "C-c C-f") 'format-all-buffer)
+
 (add-hook 'c-mode-hook
-          (lambda () (local-set-key (kbd "C-c f") 'clang-format-buffer)))
-
+          (lambda () (define-key c-mode-map (kbd "C-c C-f") 'clang-format-buffer)))
 (add-hook 'c++-mode-hook
-          (lambda () (local-set-key (kbd "C-c f") 'clang-format-buffer)))
-
+          (lambda () (define-key c++-mode-map (kbd "C-c C-f") 'clang-format-buffer)))
 (add-hook 'go-mode-hook
-          (lambda () (local-set-key (kbd "C-c f") 'gofmt)))
+          (lambda () (define-key go-mode-map (kbd "C-c C-f") 'gofmt)))
 
 (defun company-go-mode-setup()
   "Create golang company backend."
@@ -105,17 +111,13 @@
                                  company-dabbrev-code
                                  company-files)))
 
-(global-set-key (kbd "M-o") 'company-complete)
-
 (use-package go-mode
   :ensure t
   :hook (
          (before-save . gofmt-before-save)
          (go-mode . company-go-mode-setup)))
-
 (use-package go-gen-test
   :ensure t)
-
 (use-package go-dlv
   :ensure t)
 
@@ -123,10 +125,14 @@
   :ensure t
   :config
   (global-company-mode))
+(global-set-key (kbd "M-o") 'company-complete)
 
 (use-package flycheck
   :ensure t
-  :init (global-flycheck-mode))
+  :config
+  (setq truncate-lines nil)
+  :hook
+  (prog-mode . flycheck-mode))
 
 (use-package yasnippet
   :ensure t)
@@ -146,10 +152,10 @@
 (global-set-key (kbd "DEL") 'backward-delete-char)
 
 (defun my-c-c++-mode-hook ()
-  (setq c-default-style "linux")    ;; 使用 Linux 风格的缩进（可选，可以改为 "bsd" 或 "gnu"）
-  (setq c-basic-offset 8)           ;; 每层缩进使用 4 个空格
-  (setq tab-width 8)                ;; Tab 键宽度设置为 4
-  (setq indent-tabs-mode t))      ;; 禁止使用 Tab 字符，使用空格
+  (setq c-default-style "linux")
+  (setq c-basic-offset 8)
+  (setq tab-width 8)
+  (setq indent-tabs-mode t))
 
 (add-hook 'c-mode-hook 'my-c-c++-mode-hook)
 (add-hook 'c++-mode-hook 'my-c-c++-mode-hook)
@@ -163,27 +169,9 @@
     (insert "//")))            ;; 如果不是注释，则插入 '//'
 
 (defun my-go-mode-setup ()
-  "Go-mode 配置"
   (local-set-key (kbd "C-c C-/") 'my-go-comment-line))
 
 (add-hook 'go-mode-hook 'my-go-mode-setup)
-
-(defvar my-move-beginning-of-line-count 0
-  "用于跟踪 C-a 按下次数的变量。")
-
-(defun my-move-beginning-of-line ()
-  "第一次按下 C-a 时移动到行首，第二次按下时移动到第一个非空白字符位置。"
-  (interactive)
-  (if (= my-move-beginning-of-line-count 0)
-      (progn
-        (move-beginning-of-line 1)
-        (setq my-move-beginning-of-line-count 1))  ;; 第一次按下，正常移动到行首
-    (progn
-      (move-beginning-of-line 2)  ;; 第二次按下，跳到第一个非空白字符
-      (setq my-move-beginning-of-line-count 0))))  ;; 重置计数
-(global-set-key (kbd "C-a") 'my-move-beginning-of-line)
-
-(global-set-key (kbd "<f7>") 'repeat-complex-command)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -192,7 +180,14 @@
  ;; If there is more than one, they won't work right.
  '(mini-frame-show-parameters '((top . 10) (width . 0.7) (left . 0.5)))
  '(package-selected-packages
-   '(rime cmake-mode clang-format yaml-mode which-key rainbow-mode rainbow-delimiters magit lsp-mode json-mode go-gen-test go-dlv flycheck company auctex)))
+   '(auctex clang-format cmake-ide cmake-mode comment-tags company
+            dashboard emmet-mode flycheck format-all go-dlv
+            go-gen-test grip-mode impatient-showdown js2-mode
+            json-mode ligature lsp-mode lua-mode magit
+            markdown-preview-mode mini-frame neotree
+            rainbow-delimiters rainbow-mode rime
+            treemacs-all-the-icons vlf wc-mode web-mode which-key
+            xclip yaml-mode yasnippet)))
 
 (use-package treemacs
   :ensure t
@@ -221,16 +216,28 @@
 (add-hook 'text-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'org-mode-hook #'rainbow-delimiters-mode)
 
-(load (expand-file-name "ans-mode.el" user-emacs-directory))
-(load (expand-file-name "dashboard.el" user-emacs-directory))
-(load (expand-file-name "liga.el" user-emacs-directory))
+(defun load-el (path)
+  "Load single el file from user Emacs directory.  PATH: string, The file path."
+  (load (expand-file-name path user-emacs-directory)))
+
+(load-el "ans-mode.el")
+(load-el "dashboard.el")
+(load-el "liga.el")
+(load-el "run.el")
 
 (use-package lua-mode
-  :ensure t)
+  :ensure t
+  :hook
+  (lua-mode . (lambda ()
+                (define-key lua-mode-map (kbd "C-c C-f") 'format-all-buffer))))
 
 (use-package markdown-mode
   :ensure t
   :mode ("\\.md\\'" . markdown-mode))
+
+(use-package impatient-mode
+  :ensure t
+  :mode ("\\.md\\'" . impatient-mode))
 
 (use-package conf-mode
   :ensure t
@@ -247,118 +254,6 @@
 
 (load-theme 'tango-dark t)
 
-(defvar executable-path "./main"
-  "The path to the executable file.")
-
-(defun set-executable-path ()
-  "Prompt the user to set the path for the executable file."
-  (interactive)
-  (setq executable-path (read-file-name "")))
-
-(defun set-compile-command-for-golang ()
-  "Set the default command to compile for golang"
-  (setq-local compile-command "go build"))
-
-(require 'compile)
-(global-set-key (kbd "<f6>")
-                (lambda ()
-                  (interactive)
-                  (recompile)  ;; 进行构建
-                  (when my-executable-path
-                    (shell-command my-executable-path))  ;; 使用设置的路径运行可执行文件
-                  ))
-
-;; 定义一个全局变量来存储用户设置的 Bash 命令
-(defvar run-command-var nil
-  "The Bash command to run when F7 is pressed.")
-
-;; 设置 Bash 命令
-(defun set-run-command (command)
-  "Set the Bash command to be executed by F7."
-  (interactive "sEnter the Bash command to run: ")
-  (setq run-command-var command)
-  (message "Run command set to: %s" command))
-
-;; 运行 Bash 命令并显示在垂直分割的窗口中
-(defun run-command-in-term ()
-  "Run the Bash command stored in `my-run-command' in a vertically split terminal buffer."
-  (interactive)
-  (if run-command-var
-      (progn
-        ;; 垂直分割窗口
-        (split-window-right)
-        (other-window 1)
-        ;; 创建一个新的终端缓冲区
-        (let ((buffer (generate-new-buffer-name (concat "*Run: " run-command-var "*"))))
-          (ansi-term "/bin/bash") ; 启动 Bash
-          (rename-buffer buffer)
-          ;; 发送命令到终端
-          (term-send-string (get-buffer-process buffer) (concat run-command-var "\n"))))
-    (message "No run command to be set. Use M-x set-run-command to set one.")))
-
-(defun term-send-eof-and-close ()
-  "Send EOF to the terminal process, close the window, and kill the buffer."
-  (interactive)
-  (when (term-check-proc (current-buffer))
-    (term-send-eof))
-  (if (y-or-n-p "Buffer has a running process; kill it?")
-      (progn
-        (kill-buffer (current-buffer))
-        (delete-window)
-    (message "Process not killed, buffer remains."))))
-
-; C-d在能退出终端的时候清理掉Terminal buffer
-(add-hook 'term-mode-hook
-          (lambda ()
-            (define-key term-raw-map (kbd "C-d") 'term-send-eof-and-close)))
-
-(global-set-key (kbd "<f7>") 'run-command-in-term)
-
-(defvar run-commands-list '("./build/build.sh" "./run.sh")
-  "List of commonly used bash commands.")
-
-(defun select-run-command ()
-  "Open a temporary buffer with common bash commands for selection."
-  (interactive)
-  (let ((buffer (get-buffer-create "*Run Command*")))
-    (with-current-buffer buffer
-      (erase-buffer)
-      (insert "Pick the command you want to use as the one that runs your code or project.\n\n")
-      (dolist (cmd run-commands-list)
-        (insert (concat cmd "\n")))
-      (goto-char (point-min))
-      (read-only-mode t)
-    (switch-to-buffer-other-window buffer)
-    (local-set-key (kbd "RET") 'select-run-command-at-the-point)
-    (local-set-key (kbd "q") 'close-select-bash-command-buffer))))
-
-(defun select-run-command-at-the-point ()
-  "Select the command at point and set it to `selected-command`."
-  (interactive)
-  (setq run-command-var (buffer-substring (line-beginning-position) (line-end-position)))
-  (message "Selected command: %s" run-command-var)
-  (close-select-bash-command-buffer))
-
-(defun close-select-bash-command-buffer ()
-  "Close the buffer and delete the window."
-  (interactive)
-  (let ((buffer (current-buffer)))
-    (delete-window)
-    (kill-buffer buffer)))
-
-(global-set-key (kbd "C-c <f7>") 'select-run-command)
-
-;; 提供 M-x run-command 来设置 Bash 命令
-(defalias 'run-command 'set-run-command)
-
-;; Common Lisp支持
-(use-package slime
-  :ensure t
-  :init
-  (setq inferior-lisp-program "/usr/bin/sbcl")  ; 设置 SBCL 的路径
-  :config
-  (slime-setup))
-
 ;; Web 支持
 (use-package web-mode
   :ensure t)
@@ -366,12 +261,9 @@
   :ensure t)
 (use-package js2-mode
   :ensure t)
-
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))  ;; HTML 文件
 (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))    ;; JavaScript 文件
-
 (add-hook 'web-mode-hook  (lambda () (emmet-mode t)))
-
 (add-hook 'web-mode-hook
           (lambda ()
             (when (equal web-mode-content-type "javascript")
@@ -390,14 +282,6 @@
 (when (not (display-graphic-p))
   (require 'xclip)
   (xclip-mode 1))
-
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
 
 (provide 'init)
 ;;; init.el ends here
