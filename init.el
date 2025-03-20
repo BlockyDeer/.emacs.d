@@ -99,6 +99,11 @@
 (use-package format-all
   :ensure t)
 (global-set-key (kbd "C-c C-f") 'format-all-buffer)
+(add-hook 'lua-mode-hook
+          (lambda () (setq format-all-formatters
+                           '(("Lua" (stylua))))))
+;; Format the buffer when it to be saved.
+(add-hook 'prog-mode-hook 'format-all-mode)
 
 (add-hook 'c-mode-hook
           (lambda () (define-key c-mode-map (kbd "C-c C-f") 'clang-format-buffer)))
