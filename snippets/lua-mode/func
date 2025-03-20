@@ -1,40 +1,7 @@
-  WorldTesting
-    ahoge-framework
-      math
-      shader
-        gradient_rect.glsl
-      love_util.lua
-    tool
-    conf.lua
-    config.lua
-    main.lua
-    test.lua
-
-  .emacs.d
-    .cache
-    advance-words-count.el
-    auto-save-list
-    eln-cache
-    elpa
-    rime
-    snippets
-      c++-mode
-      lua-mode
-        func
-        req
-    transient
-    url
-    .emacs.desktop
-    .gitignore
-    .lsp-session-v1
-    README.md
-    ahoge_logo.png
-    ans-mode.el
-    bookmarks
-    dashboard.el
-    font.el
-    init.el
-    liga.el
-    projects
-    recentf
-    run.el
+# -*- mode: snippet -*-
+# name: func
+# key: func
+# --
+function ${name}(${args})
+         $0
+end
