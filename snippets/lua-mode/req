@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: req
+# key: req
+# --
+local ${var} = require("${file}")
+$0
