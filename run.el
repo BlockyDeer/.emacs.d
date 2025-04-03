@@ -5,7 +5,7 @@
 ;; 设置 Bash 命令
 (defun set-run-command (command)
   "Set the Bash command to be executed by F7."
-  (interactive (list (read-shell-command "sEnter the run command: ")))
+  (interactive (list (read-shell-command "Enter the run command: ")))
   (setq run-command-var command)
   (message "Run command set to: %s" command))
 
