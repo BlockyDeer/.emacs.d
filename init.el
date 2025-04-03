@@ -70,28 +70,9 @@
   :hook ((go-mode . lsp)
          (c++-mode . lsp)
          (c-mode . lsp)
-         (python-mode . lsp))
+         (python-mode . lsp)
+         (lua-mode . lsp))
   :commands lsp)
-
-(use-package comment-tags
-  :ensure t)
-(setq comment-tags-keymap-prefix (kbd "C-c t"))
-(with-eval-after-load "comment-tags"
-  (setq comment-tags-keyword-faces
-        `(("TODO" . ,(list :weight 'bold :foreground "#28ABE3"))
-          ("FIXME" . ,(list :weight 'bold :foreground "#DB3340"))
-          ("BUG" . ,(list :weight 'bold :foreground "#DB3340"))
-          ("HACK" . ,(list :weight 'bold :foreground "#E8B71A"))
-          ("KLUDGE" . ,(list :weight 'bold :foreground "#E8B71A"))
-          ("XXX" . ,(list :weight 'bold :foreground "#F7EAC8"))
-          ("INFO" . ,(list :weight 'bold :foreground "#F7EAC8"))
-          ("DONE" . ,(list :weight 'bold :foreground "#1FDA9A"))))
-  (setq comment-tags-comment-start-only t
-        comment-tags-require-colon t
-        comment-tags-case-sensitive t
-        comment-tags-show-faces t
-        comment-tags-lighter nil))
-(add-hook 'prog-mode-hook 'comment-tags-mode)
 
 (use-package clang-format
   :ensure t)
@@ -134,6 +115,34 @@
   :config
   (global-company-mode))
 (global-set-key (kbd "M-o") 'company-complete)
+
+;; compile setting
+(global-set-key (kbd "<f6>") 'recompile)
+;; default compiling commands
+;; Force the Emacs loading the compile package first
+(message "compile-command 初始值: %s" compile-command)
+(require 'compile)
+(message "加载 compile 包后值: %s" compile-command)
+(add-hook 'prog-mode-hook
+  (lambda ()
+    (setq-local compile-command
+      (cond
+        ((derived-mode-p 'lua-mode) "lua main.lua")
+        ((derived-mode-p 'go-mode) "go build .")
+        (t "make -k")))))
+(defun set-compile-command-c-or-cpp ()
+  "Set compile command in c/c++-mode."
+    (let (file (buffer-file-name))
+      (when file
+        (set (make-local-variable 'compile-command)
+          (if (project-current)
+              "meson compile -C build"
+            (let* ((is-c (string= (file-name-extension file) "c")))
+              (format "%s %s -Wall -Wextra -I. -Iinclude -g -o "
+                      (if is-c "gcc" "g++")
+                      (shell-quote-argument (file-name-nondirectory file)))))))))
+(add-hook 'c-mode #'set-compile-command-c-or-cpp)
+(add-hook 'c++-mode #'set-compile-command-c-or-cpp)
 
 (use-package flycheck
   :ensure t
@@ -186,6 +195,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(compilation-window-height 12)
  '(mini-frame-show-parameters '((top . 10) (width . 0.7) (left . 0.5)))
  '(package-selected-packages
    '(auctex clang-format cmake-ide cmake-mode comment-tags company
@@ -209,20 +219,10 @@
 
 (electric-pair-mode 1)
 
-(use-package rainbow-mode
-  :ensure t)
-(add-hook 'prog-mode-hook #'rainbow-mode)
-(add-hook 'html-mode-hook #'rainbow-mode)
-
-(use-package rainbow-delimiters
-  :ensure t)
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-(add-hook 'text-mode-hook #'rainbow-delimiters-mode)
-(add-hook 'org-mode-hook #'rainbow-delimiters-mode)
-
 (load-el "ans-mode.el")
 (load-el "dashboard.el")
 (load-el "liga.el")
+(load-el "colorful.el")
 (load-el "run.el")
 
 (use-package lua-mode
@@ -286,3 +286,9 @@
 (provide 'init)
 ;;; init.el ends here
 
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

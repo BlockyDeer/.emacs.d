@@ -5,7 +5,7 @@
 ;; 设置 Bash 命令
 (defun set-run-command (command)
   "Set the Bash command to be executed by F7."
-  (interactive "sEnter the Bash command to run: ")
+  (interactive (list (read-shell-command "sEnter the run command: ")))
   (setq run-command-var command)
   (message "Run command set to: %s" command))
 
@@ -31,11 +31,9 @@
   (interactive)
   (when (term-check-proc (current-buffer))
     (term-send-eof))
-  (if (y-or-n-p "Buffer has a running process; kill it?")
-      (progn
-        (kill-buffer (current-buffer))
-        (delete-window)
-    (message "Process not killed, buffer remains."))))
+    (kill-buffer (current-buffer))
+    (delete-window)
+    (message "Process not killed, buffer remains."))
 
 ; C-d在能退出终端的时候清理掉Terminal buffer
 (add-hook 'term-mode-hook
