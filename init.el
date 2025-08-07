@@ -1,9 +1,9 @@
 ;;; commentary: 我的emacs配置 -- init.el
 
 ;;; Code:
-(setq package-archives '(("gnu"    . "https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-                         ("nongnu" . "https://mirrors.tuna.tsinghua.edu.cn/elpa/nongnu/")
-                         ("melpa"  . "https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
+(setq package-archives '(("gnu" . "https://mirrors.ustc.edu.cn/elpa/gnu/")
+                         ("melpa" . "https://mirrors.ustc.edu.cn/elpa/melpa/")
+                         ("nongnu" . "https://mirrors.ustc.edu.cn/elpa/nongnu/")))
 
 (package-initialize)
 
@@ -33,10 +33,11 @@
 (add-hook 'wc-mode-hook (lambda () (local-set-key (kbd "C-c C-c") 'wc)))
 
 (use-package mini-frame
-  :ensure)
+  :ensure t)
 (mini-frame-mode t)
 
 (use-package rime
+  :ensure t
   :custom
   (default-input-method "rime")
   :bind
@@ -49,7 +50,8 @@
 (which-key-mode)
 
 (load-el "font.el")
-(set-global-fonts "FiraCode Nerd Font-16" "Noto Sans CJK SC" "Noto Color Emoji")
+;(set-global-fonts "FiraCode Nerd Font-16" "Noto Sans CJK SC" "Noto Color Emoji")
+(set-frame-font "Maple Mono Normal NF CN-16" nil t)
 
 (setq
      backup-by-copying t ; 自动备份
@@ -60,19 +62,27 @@
      kept-old-versions 1 ; 保留最早的1个备份文件
      version-control t) ; 多次备份
 
+(global-set-key (kbd "C-c o") 'ff-find-other-file)
+
 (use-package eglot
   :ensure t
   :hook ((go-mode . eglot-ensure)
-         (c++-mode . eglot-ensure)))
+         (c++-mode . eglot-ensure)
+         (c-mode . eglot-ensure))
+  :bind
+  (:map eglot-mode-map
+        ("C-c C-r" . 'eglot-rename)
+        ("C-c C-i" . 'eglot-code-actions))
+  )
 
-(use-package lsp-mode
-  :ensure t
-  :hook ((go-mode . lsp)
-         (c++-mode . lsp)
-         (c-mode . lsp)
-         (python-mode . lsp)
-         (lua-mode . lsp))
-  :commands lsp)
+;(use-package lsp-mode
+;  :ensure t
+;  :hook ((go-mode . lsp)
+;         (c++-mode . lsp)
+;         (c-mode . lsp)
+;         (python-mode . lsp)
+;         (lua-mode . lsp))
+;  :commands lsp)
 
 (use-package clang-format
   :ensure t)
@@ -144,12 +154,12 @@
 (add-hook 'c-mode #'set-compile-command-c-or-cpp)
 (add-hook 'c++-mode #'set-compile-command-c-or-cpp)
 
-(use-package flycheck
-  :ensure t
-  :config
-  (setq truncate-lines nil)
-  :hook
-  (prog-mode . flycheck-mode))
+;(use-package flycheck
+;  :ensure t
+;  :config
+;  (setq truncate-lines nil)
+;  :hook
+;  (prog-mode . flycheck-mode))
 
 (use-package yasnippet
   :ensure t)
@@ -197,15 +207,7 @@
  ;; If there is more than one, they won't work right.
  '(compilation-window-height 12)
  '(mini-frame-show-parameters '((top . 10) (width . 0.7) (left . 0.5)))
- '(package-selected-packages
-   '(auctex clang-format cmake-ide cmake-mode comment-tags company
-            dashboard emmet-mode flycheck format-all go-dlv
-            go-gen-test grip-mode impatient-showdown js2-mode
-            json-mode ligature lsp-mode lua-mode magit
-            markdown-preview-mode mini-frame neotree
-            rainbow-delimiters rainbow-mode rime
-            treemacs-all-the-icons vlf wc-mode web-mode which-key
-            xclip yaml-mode yasnippet)))
+ '(package-selected-packages nil))
 
 (use-package treemacs
   :ensure t
@@ -216,6 +218,7 @@
 
 (use-package magit
   :ensure t)
+(global-set-key (kbd "<f5>") 'magit-status)
 
 (electric-pair-mode 1)
 

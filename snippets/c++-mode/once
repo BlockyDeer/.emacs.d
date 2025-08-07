@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: once
+# key: once
+# --
+#pragma once
+$0
