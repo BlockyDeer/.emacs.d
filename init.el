@@ -1,36 +1,54 @@
 ;;; commentary: 我的emacs配置 -- init.el
 
 ;;; Code:
-(setq package-archives '(("gnu" . "https://mirrors.ustc.edu.cn/elpa/gnu/")
-                         ("melpa" . "https://mirrors.ustc.edu.cn/elpa/melpa/")
-                         ("nongnu" . "https://mirrors.ustc.edu.cn/elpa/nongnu/")))
-
-(package-initialize)
-
 (defun load-el (path)
   "Load single el file from user Emacs directory.  PATH: string, The file path."
   (load (expand-file-name path user-emacs-directory)))
 
-(setq frame-title-format "%b - Ahoge Emacs")
+(load-el "setup.el")
 
-(menu-bar-mode -1)
-(tool-bar-mode -1)
+;; General Configuration
+;; Theme and font
+(load-theme 'tango-dark t)
+(load-el "font.el")
+;(set-global-fonts "FiraCode Nerd Font-16" "Noto Sans CJK SC" "Noto Color Emoji")
+(set-frame-font "Maple Mono Normal NF CN-16" nil t)
 
-;; 安装 use-package
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+(global-unset-key (kbd "C-h"))
+(global-set-key (kbd "C-h") 'backward-delete-char-untabify)
 
-;; 启用 use-package
-(eval-when-compile
-  (require 'use-package))
+(use-package emacs
+  :ensure nil
+  :custom
+  (indent-tabs-mode nil)
+  (tab-width 8))
+
+(use-package menu-bar
+  :ensure nil
+  :bind
+  ("C-c y" . clipboard-yank))
+
+;; files
+(use-package files
+  :ensure nil
+  :config (auto-save-visited-mode t)
+  :custom
+  (backup-by-copying t)
+  (backup-directory-alist '(("." . "~/.emacs_backup/")))
+  (delete-old-versions t)
+  (kept-new-versions 3)
+  (kept-old-version 1)
+  (version-control t)
+  (auto-save-visited-interval 1)
+  )
 
 (use-package vlf
-  :ensure t)
+  :ensure t
+  :commands (vlf))
 
 (use-package wc-mode
-  :ensure t)
-(add-hook 'wc-mode-hook (lambda () (local-set-key (kbd "C-c C-c") 'wc)))
+  :ensure t
+  :bind ("C-c C-c" . wc))
 
 (use-package mini-frame
   :ensure t)
@@ -41,29 +59,45 @@
   :custom
   (default-input-method "rime")
   :bind
-  (:map rime-mode-map
-        ("C-`" . 'rime-send-keybinding))
+  ("C-`" . 'rime-send-keybinding)
   )
 
 (use-package which-key
-  :ensure t)
-(which-key-mode)
+  :ensure t
+  :config (which-key-mode t))
 
-(load-el "font.el")
-;(set-global-fonts "FiraCode Nerd Font-16" "Noto Sans CJK SC" "Noto Color Emoji")
-(set-frame-font "Maple Mono Normal NF CN-16" nil t)
+(use-package elec-pair
+  :ensure nil
+  :config (electric-pair-mode t))
 
-(setq
-     backup-by-copying t ; 自动备份
-     backup-directory-alist
-     '(("." . "~/.emacs_backup")) ; 自动备份在目录"~/.em_backup"下
-     delete-old-versions t ; 自动删除旧的备份文件
-     kept-new-versions 3 ; 保留最近的3个备份文件
-     kept-old-versions 1 ; 保留最早的1个备份文件
-     version-control t) ; 多次备份
+(load-el "ans-mode.el")
+(load-el "dashboard.el")
+(load-el "liga.el")
+(load-el "colorful.el")
+(load-el "run.el")
 
-(global-set-key (kbd "C-c o") 'ff-find-other-file)
+(use-package find-file
+  :ensure nil
+  :bind ("C-c o" . ff-find-other-file))
 
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode)
+  :bind
+  ("M-o" . company-complete)
+  )
+
+(use-package yasnippet
+  :ensure t
+  :config
+  (yas-global-mode 1)
+  :bind
+  ("C-c i" . yas-insert-snippet)
+  ("M-p" . yas-expand)
+  )
+
+;; LSP
 (use-package eglot
   :ensure t
   :hook ((go-mode . eglot-ensure)
@@ -75,130 +109,37 @@
         ("C-c C-i" . 'eglot-code-actions))
   )
 
-;(use-package lsp-mode
-;  :ensure t
-;  :hook ((go-mode . lsp)
-;         (c++-mode . lsp)
-;         (c-mode . lsp)
-;         (python-mode . lsp)
-;         (lua-mode . lsp))
-;  :commands lsp)
+(use-package meson-mode
+  :ensure t)
+
+(use-package glsl-mode
+  :ensure t)
 
 (use-package clang-format
   :ensure t)
 
 (use-package format-all
-  :ensure t)
-(global-set-key (kbd "C-c C-f") 'format-all-buffer)
-(add-hook 'lua-mode-hook
-          (lambda () (setq format-all-formatters
-                           '(("Lua" (stylua))))))
-;; Format the buffer when it to be saved.
-(add-hook 'prog-mode-hook 'format-all-mode)
-
-(add-hook 'c-mode-hook
-          (lambda () (define-key c-mode-map (kbd "C-c C-f") 'clang-format-buffer)))
-(add-hook 'c++-mode-hook
-          (lambda () (define-key c++-mode-map (kbd "C-c C-f") 'clang-format-buffer)))
-(add-hook 'go-mode-hook
-          (lambda () (define-key go-mode-map (kbd "C-c C-f") 'gofmt)))
-
-(defun company-go-mode-setup()
-  "Create golang company backend."
-  (setq-local company-backends '(
-                                 company-capf
-                                 company-dabbrev-code
-                                 company-files)))
-
-(use-package go-mode
   :ensure t
-  :hook (
-         (before-save . gofmt-before-save)
-         (go-mode . company-go-mode-setup)))
-(use-package go-gen-test
-  :ensure t)
-(use-package go-dlv
-  :ensure t)
+  :bind ("C-c C-f" . format-all-buffer))
 
-(use-package company
-  :ensure t
-  :config
-  (global-company-mode))
-(global-set-key (kbd "M-o") 'company-complete)
+;(add-hook 'c-mode-hook
+;          (lambda () (define-key c-mode-map (kbd "C-c C-f") 'clang-format-buffer)))
+;(add-hook 'c++-mode-hook
+;          (lambda () (define-key c++-mode-map (kbd "C-c C-f") 'clang-format-buffer)))
+;(add-hook 'go-mode-hook
+;          (lambda () (define-key go-mode-map (kbd "C-c C-f") 'gofmt)))
 
-;; compile setting
-(global-set-key (kbd "<f6>") 'recompile)
-;; default compiling commands
-;; Force the Emacs loading the compile package first
-(message "compile-command 初始值: %s" compile-command)
-(require 'compile)
-(message "加载 compile 包后值: %s" compile-command)
-(add-hook 'prog-mode-hook
-  (lambda ()
-    (setq-local compile-command
-      (cond
-        ((derived-mode-p 'lua-mode) "lua main.lua")
-        ((derived-mode-p 'go-mode) "go build .")
-        (t "make -k")))))
-(defun set-compile-command-c-or-cpp ()
-  "Set compile command in c/c++-mode."
-    (let (file (buffer-file-name))
-      (when file
-        (set (make-local-variable 'compile-command)
-          (if (project-current)
-              "meson compile -C build"
-            (let* ((is-c (string= (file-name-extension file) "c")))
-              (format "%s %s -Wall -Wextra -I. -Iinclude -g -o "
-                      (if is-c "gcc" "g++")
-                      (shell-quote-argument (file-name-nondirectory file)))))))))
-(add-hook 'c-mode #'set-compile-command-c-or-cpp)
-(add-hook 'c++-mode #'set-compile-command-c-or-cpp)
+(use-package cc-mode
+  :ensure nil
+  :bind (:map c-mode-map
+              ("C-c C-f" . 'clang-format-buffer)
+              :map c++-mode-map
+              ("C-c C-f" . 'clang-format-buffer)))
 
-;(use-package flycheck
-;  :ensure t
-;  :config
-;  (setq truncate-lines nil)
-;  :hook
-;  (prog-mode . flycheck-mode))
-
-(use-package yasnippet
-  :ensure t)
-(yas-global-mode 1)
-(global-set-key (kbd "C-c i") 'yas-insert-snippet)
-(global-set-key (kbd "M-p") 'yas-expand)
-
-(dolist (mode '(text-mode-hook
-                prog-mode-hook
-                conf-mode-hook))
-  (add-hook mode 'display-line-numbers-mode))
-
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 8)
-
-(global-set-key (kbd "C-h") 'backward-delete-char)
-(global-set-key (kbd "DEL") 'backward-delete-char)
-
-(defun my-c-c++-mode-hook ()
-  (setq c-default-style "linux")
-  (setq c-basic-offset 8)
-  (setq tab-width 8)
-  (setq indent-tabs-mode t))
-
-(add-hook 'c-mode-hook 'my-c-c++-mode-hook)
-(add-hook 'c++-mode-hook 'my-c-c++-mode-hook)
-
-(defun my-go-comment-line ()
-  "注释当前行，如果该行已经注释，则取消注释。"
-  (interactive)
-  (beginning-of-line)
-  (if (looking-at "\\s-*//")  ;; 检查是否已经是注释
-      (delete-char 2)         ;; 如果是注释，则删除 '//' 来取消注释
-    (insert "//")))            ;; 如果不是注释，则插入 '//'
-
-(defun my-go-mode-setup ()
-  (local-set-key (kbd "C-c C-/") 'my-go-comment-line))
-
-(add-hook 'go-mode-hook 'my-go-mode-setup)
+(use-package display-line-numbers
+  :ensure nil
+  :hook
+  ((text-mode-hook prog-mode-hook conf-mode-hook) . display-line-numbers-mode))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -220,19 +161,13 @@
   :ensure t)
 (global-set-key (kbd "<f5>") 'magit-status)
 
-(electric-pair-mode 1)
-
-(load-el "ans-mode.el")
-(load-el "dashboard.el")
-(load-el "liga.el")
-(load-el "colorful.el")
-(load-el "run.el")
 
 (use-package lua-mode
   :ensure t
-  :hook
-  (lua-mode . (lambda ()
-                (define-key lua-mode-map (kbd "C-c C-f") 'format-all-buffer))))
+  :bind ("C-c C-f" . 'format-all-buffer)
+  :custom
+  (format-all-formatters '(("Lua" (stylua))))
+  )
 
 (use-package markdown-mode
   :ensure t
@@ -254,8 +189,6 @@
 (use-package json-mode
   :ensure t
   :mode ("\\.json\\'" . json-mode))
-
-(load-theme 'tango-dark t)
 
 ;; Web 支持
 (use-package web-mode
@@ -289,9 +222,3 @@
 (provide 'init)
 ;;; init.el ends here
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
