@@ -1,0 +1,6 @@
+# -*- mode: c++ -*-
+# name: sout
+# key: sout
+# --
+std::cout << $1 << std::endl;
+$0

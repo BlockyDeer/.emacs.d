@@ -2,65 +2,86 @@
 
 ;;; Code:
 (defun load-el (path)
-  "Load single el file from user Emacs directory.  PATH: string, The file path."
-  (load (expand-file-name path user-emacs-directory)))
+ "Load single el file from user Emacs directory.  PATH: string, The file path."
+ (load (expand-file-name path user-emacs-directory)))
+
+(add-to-list 'load-path "~/.emacs.d/holo-layer/")
+(require 'holo-layer)
+(setq holo-layer-enable-cursor-animation t)
+;;(setq holo-layer-enable-indent-rainbow t)
+;; This animation is too ugly for me.
+;;(setq holo-layer-enable-type-animation t)
+(setq holo-layer-python-command "python")
+(holo-layer-enable)
 
 (load-el "setup.el")
 
+(defun switch-to-minibuffer ()
+ "Switch to minibuffer window."
+ (interactive)
+ (if (active-minibuffer-window)
+   (select-window (active-minibuffer-window))
+  (error "Minibuffer is not active")))
+(global-set-key (kbd "C-c C-o") 'switch-to-minibuffer)
+
 ;; General Configuration
 ;; Theme and font
-(load-theme 'tango-dark t)
+(use-package dracula-theme
+ :ensure t)
+(load-theme 'dracula t)
 (load-el "font.el")
-;(set-global-fonts "FiraCode Nerd Font-16" "Noto Sans CJK SC" "Noto Color Emoji")
-(set-frame-font "Maple Mono Normal NF CN-16" nil t)
+;;(set-global-fonts "FiraCode Nerd Font-16" "Noto Sans CJK SC" "Noto Color Emoji")
+(set-frame-font "Maple Mono Normal NF CN-14" nil t)
 
 (global-unset-key (kbd "C-h"))
 (global-set-key (kbd "C-h") 'backward-delete-char-untabify)
 
 (use-package emacs
-  :ensure nil
-  :custom
-  (indent-tabs-mode nil)
-  (tab-width 8))
+ :ensure nil
+ :custom
+ (indent-tabs-mode nil)
+ (tab-width 8))
+
+(use-package compile
+ :ensure nil
+ :config (setq compilation-ask-about-save nil))
 
 (use-package menu-bar
-  :ensure nil
-  :bind
-  ("C-c y" . clipboard-yank))
+ :ensure nil
+ :bind
+ ("C-c y" . clipboard-yank))
 
 ;; files
 (use-package files
-  :ensure nil
-  :config (auto-save-visited-mode t)
-  :custom
-  (backup-by-copying t)
-  (backup-directory-alist '(("." . "~/.emacs_backup/")))
-  (delete-old-versions t)
-  (kept-new-versions 3)
-  (kept-old-version 1)
-  (version-control t)
-  (auto-save-visited-interval 1)
-  )
+ :ensure nil
+ :config (auto-save-visited-mode t)
+ :custom
+ (backup-by-copying t)
+ (backup-directory-alist '(("." . "~/.emacs_backup/")))
+ (delete-old-versions t)
+ (kept-new-versions 3)
+ (kept-old-version 1)
+ (version-control t)
+ (auto-save-visited-interval 1))
 
 (use-package vlf
-  :ensure t
-  :commands (vlf))
+ :ensure t
+ :commands (vlf))
 
 (use-package wc-mode
-  :ensure t
-  :bind ("C-c C-c" . wc))
+ :ensure t
+ :bind ("C-c C-c" . wc))
 
 (use-package mini-frame
-  :ensure t)
+ :ensure t)
 (mini-frame-mode t)
 
 (use-package rime
-  :ensure t
-  :custom
-  (default-input-method "rime")
-  :bind
-  ("C-`" . 'rime-send-keybinding)
-  )
+ :ensure t
+ :custom
+ (default-input-method "rime")
+ :bind
+ ("C-`" . 'rime-send-keybinding))
 
 (use-package which-key
   :ensure t
@@ -69,6 +90,32 @@
 (use-package elec-pair
   :ensure nil
   :config (electric-pair-mode t))
+
+(use-package ivy
+  :ensure t
+  :diminish ivy-mode
+  :hook (after-init . ivy-mode))
+
+(use-package avy
+  :ensure t
+  :bind
+  ("M-s" . avy-goto-char))
+
+(use-package multiple-cursors
+  :ensure t
+  :bind
+  ("C-S-c C-S-c" . 'mc/edit-lines))
+
+(use-package dired
+  :ensure nil
+  :config
+  (setq delete-by-moving-to-trash t)
+  (put 'dired-find-alternate-file 'disabled nil)
+  :hook
+  (dired-mode . dired-hide-details-mode)
+  :bind
+  (:map dired-mode-map
+        ("b" . dired-create-empty-file)))
 
 (load-el "ans-mode.el")
 (load-el "dashboard.el")
@@ -82,37 +129,48 @@
 
 (use-package company
   :ensure t
-  :config
-  (global-company-mode)
   :bind
-  ("M-o" . company-complete)
-  )
+  ("M-o" . company-complete))
+(global-company-mode)
 
 (use-package yasnippet
   :ensure t
-  :config
-  (yas-global-mode 1)
   :bind
   ("C-c i" . yas-insert-snippet)
-  ("M-p" . yas-expand)
-  )
+  ("M-p" . yas-expand))
+(yas-global-mode t)
 
 ;; LSP
 (use-package eglot
   :ensure t
   :hook ((go-mode . eglot-ensure)
          (c++-mode . eglot-ensure)
-         (c-mode . eglot-ensure))
+         (c-mode . eglot-ensure)
+         (typescript-ts-mode . eglot-ensure)
+         (gdscript-mode . eglot-ensure)
+         (rust-mode . eglot-ensure))
+  :config
+  (setq eglot-semantic-token-faces
+        '(("macro" . font-lock-macro-face)))
   :bind
   (:map eglot-mode-map
         ("C-c C-r" . 'eglot-rename)
-        ("C-c C-i" . 'eglot-code-actions))
-  )
+        ("C-c C-i" . 'eglot-code-actions)))
+
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (global-treesit-auto-mode))
 
 (use-package meson-mode
   :ensure t)
 
 (use-package glsl-mode
+  :ensure t)
+
+(use-package rust-mode
   :ensure t)
 
 (use-package clang-format
@@ -122,13 +180,6 @@
   :ensure t
   :bind ("C-c C-f" . format-all-buffer))
 
-;(add-hook 'c-mode-hook
-;          (lambda () (define-key c-mode-map (kbd "C-c C-f") 'clang-format-buffer)))
-;(add-hook 'c++-mode-hook
-;          (lambda () (define-key c++-mode-map (kbd "C-c C-f") 'clang-format-buffer)))
-;(add-hook 'go-mode-hook
-;          (lambda () (define-key go-mode-map (kbd "C-c C-f") 'gofmt)))
-
 (use-package cc-mode
   :ensure nil
   :bind (:map c-mode-map
@@ -136,19 +187,27 @@
               :map c++-mode-map
               ("C-c C-f" . 'clang-format-buffer)))
 
+(use-package gdscript-mode
+  :ensure t)
+
 (use-package display-line-numbers
   :ensure nil
   :hook
   ((text-mode-hook prog-mode-hook conf-mode-hook) . display-line-numbers-mode))
+
+(use-package highlight-indent-guides
+  :ensure t
+  :hook (prog-mode . highlight-indent-guides-mode))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(compilation-window-height 12)
- '(mini-frame-show-parameters '((top . 10) (width . 0.7) (left . 0.5)))
- '(package-selected-packages nil))
+ '(highlight-indent-guides-auto-character-face-perc 30)
+ '(highlight-indent-guides-auto-even-face-perc 30)
+ '(highlight-indent-guides-auto-odd-face-perc 25)
+ '(highlight-indent-guides-method 'character))
 
 (use-package treemacs
   :ensure t
@@ -161,13 +220,15 @@
   :ensure t)
 (global-set-key (kbd "<f5>") 'magit-status)
 
-
 (use-package lua-mode
   :ensure t
   :bind ("C-c C-f" . 'format-all-buffer)
   :custom
-  (format-all-formatters '(("Lua" (stylua))))
-  )
+  (format-all-formatters '(("Lua" (stylua)))))
+
+(use-package slime
+  :ensure t)
+(setq inferior-lisp-program "sbcl")
 
 (use-package markdown-mode
   :ensure t
@@ -198,7 +259,6 @@
 (use-package js2-mode
   :ensure t)
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))  ;; HTML 文件
-(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))    ;; JavaScript 文件
 (add-hook 'web-mode-hook  (lambda () (emmet-mode t)))
 (add-hook 'web-mode-hook
           (lambda ()
@@ -215,6 +275,9 @@
 (use-package xclip
   :ensure t)
 
+(use-package autothemer
+  :ensure t)
+
 (when (not (display-graphic-p))
   (require 'xclip)
   (xclip-mode 1))
@@ -222,3 +285,9 @@
 (provide 'init)
 ;;; init.el ends here
 
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
