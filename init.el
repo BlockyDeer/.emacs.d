@@ -20,8 +20,8 @@
  "Switch to minibuffer window."
  (interactive)
  (if (active-minibuffer-window)
-   (select-window (active-minibuffer-window))
-  (error "Minibuffer is not active")))
+  (select-window (active-minibuffer-window))
+ (error "Minibuffer is not active")))
 (global-set-key (kbd "C-c C-o") 'switch-to-minibuffer)
 
 ;; General Configuration
@@ -84,38 +84,38 @@
  ("C-`" . 'rime-send-keybinding))
 
 (use-package which-key
-  :ensure t
-  :config (which-key-mode t))
+ :ensure t
+ :config (which-key-mode t))
 
 (use-package elec-pair
-  :ensure nil
-  :config (electric-pair-mode t))
+ :ensure nil
+ :config (electric-pair-mode t))
 
 (use-package ivy
-  :ensure t
-  :diminish ivy-mode
-  :hook (after-init . ivy-mode))
+ :ensure t
+ :diminish ivy-mode
+ :hook (after-init . ivy-mode))
 
 (use-package avy
-  :ensure t
-  :bind
-  ("M-s" . avy-goto-char))
+ :ensure t
+ :bind
+ ("M-s" . avy-goto-char))
 
 (use-package multiple-cursors
-  :ensure t
-  :bind
-  ("C-S-c C-S-c" . 'mc/edit-lines))
+ :ensure t
+ :bind
+ ("C-S-c C-S-c" . 'mc/edit-lines))
 
 (use-package dired
-  :ensure nil
-  :config
-  (setq delete-by-moving-to-trash t)
-  (put 'dired-find-alternate-file 'disabled nil)
-  :hook
-  (dired-mode . dired-hide-details-mode)
-  :bind
-  (:map dired-mode-map
-        ("b" . dired-create-empty-file)))
+ :ensure nil
+ :config
+ (setq delete-by-moving-to-trash t)
+ (put 'dired-find-alternate-file 'disabled nil)
+ :hook
+ (dired-mode . dired-hide-details-mode)
+ :bind
+ (:map dired-mode-map
+      ("b" . dired-create-empty-file)))
 
 (load-el "ans-mode.el")
 (load-el "dashboard.el")
@@ -124,170 +124,159 @@
 (load-el "run.el")
 
 (use-package find-file
-  :ensure nil
-  :bind ("C-c o" . ff-find-other-file))
+ :ensure nil
+ :bind ("C-c o" . ff-find-other-file))
 
 (use-package company
-  :ensure t
-  :bind
-  ("M-o" . company-complete))
+ :ensure t
+ :bind
+ ("M-o" . company-complete))
 (global-company-mode)
 
 (use-package yasnippet
-  :ensure t
-  :bind
-  ("C-c i" . yas-insert-snippet)
-  ("M-p" . yas-expand))
+ :ensure t
+ :bind
+ ("C-c i" . yas-insert-snippet)
+ ("M-p" . yas-expand))
 (yas-global-mode t)
 
 ;; LSP
 (use-package eglot
-  :ensure t
-  :hook ((go-mode . eglot-ensure)
-         (c++-mode . eglot-ensure)
-         (c-mode . eglot-ensure)
-         (typescript-ts-mode . eglot-ensure)
-         (gdscript-mode . eglot-ensure)
-         (rust-mode . eglot-ensure))
-  :config
-  (setq eglot-semantic-token-faces
-        '(("macro" . font-lock-macro-face)))
-  :bind
-  (:map eglot-mode-map
-        ("C-c C-r" . 'eglot-rename)
-        ("C-c C-i" . 'eglot-code-actions)))
+ :ensure t
+ :hook ((go-mode . eglot-ensure)
+       (c++-mode . eglot-ensure)
+       (c-mode . eglot-ensure)
+       (typescript-ts-mode . eglot-ensure)
+       (gdscript-mode . eglot-ensure)
+       (rust-mode . eglot-ensure))
+ :config
+ (setq eglot-semantic-token-faces
+      '(("macro" . font-lock-macro-face)))
+ :bind
+ (:map eglot-mode-map
+      ("C-c C-r" . 'eglot-rename)
+      ("C-c C-i" . 'eglot-code-actions)))
 
 (use-package treesit-auto
-  :ensure t
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (global-treesit-auto-mode))
+ :ensure t
+ :custom
+ (treesit-auto-install 'prompt)
+ :config
+ (global-treesit-auto-mode))
 
 (use-package meson-mode
-  :ensure t)
+ :ensure t)
 
 (use-package glsl-mode
-  :ensure t)
+ :ensure t)
 
 (use-package rust-mode
-  :ensure t)
+ :ensure t)
 
 (use-package clang-format
-  :ensure t)
+ :ensure t)
 
 (use-package format-all
-  :ensure t
-  :bind ("C-c C-f" . format-all-buffer))
+ :ensure t
+ :bind ("C-c C-f" . format-all-buffer))
 
 (use-package cc-mode
-  :ensure nil
-  :bind (:map c-mode-map
-              ("C-c C-f" . 'clang-format-buffer)
-              :map c++-mode-map
-              ("C-c C-f" . 'clang-format-buffer)))
+ :ensure nil
+ :bind (:map c-mode-map
+          ("C-c C-f" . 'clang-format-buffer)
+          :map c++-mode-map
+          ("C-c C-f" . 'clang-format-buffer)))
 
 (use-package gdscript-mode
-  :ensure t)
+ :ensure t)
 
 (use-package display-line-numbers
-  :ensure nil
-  :hook
-  ((text-mode-hook prog-mode-hook conf-mode-hook) . display-line-numbers-mode))
+ :ensure nil
+ :hook
+ ((text-mode-hook prog-mode-hook conf-mode-hook) . display-line-numbers-mode))
 
 (use-package highlight-indent-guides
-  :ensure t
-  :hook (prog-mode . highlight-indent-guides-mode))
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(highlight-indent-guides-auto-character-face-perc 30)
- '(highlight-indent-guides-auto-even-face-perc 30)
- '(highlight-indent-guides-auto-odd-face-perc 25)
- '(highlight-indent-guides-method 'character))
+ :ensure t
+ :hook (prog-mode . highlight-indent-guides-mode)
+ :custom
+ (highlight-indent-guides-auto-character-face-perc 30)
+ (highlight-indent-guides-auto-even-face-perc 30)
+ (highlight-indent-guides-auto-odd-face-perc 25)
+ (highlight-indent-guides-method 'character))  
 
 (use-package treemacs
-  :ensure t
-  :defer t)
+ :ensure t
+ :defer t)
 (global-set-key (kbd "<f8>") 'treemacs)
 
 (setq treemacs-show-hidden-files t)
 
 (use-package magit
-  :ensure t)
+ :ensure t)
 (global-set-key (kbd "<f5>") 'magit-status)
 
 (use-package lua-mode
-  :ensure t
-  :bind ("C-c C-f" . 'format-all-buffer)
-  :custom
-  (format-all-formatters '(("Lua" (stylua)))))
+ :ensure t
+ :bind ("C-c C-f" . 'format-all-buffer)
+ :custom
+ (format-all-formatters '(("Lua" (stylua)))))
 
 (use-package slime
-  :ensure t)
+ :ensure t)
 (setq inferior-lisp-program "sbcl")
 
 (use-package markdown-mode
-  :ensure t
-  :mode ("\\.md\\'" . markdown-mode))
+ :ensure t
+ :mode ("\\.md\\'" . markdown-mode))
 
 (use-package impatient-mode
-  :ensure t
-  :mode ("\\.md\\'" . impatient-mode))
+ :ensure t
+ :mode ("\\.md\\'" . impatient-mode))
 
 (use-package conf-mode
-  :ensure t
-  :mode ("\\.ini\\'" . conf-mode))
+ :ensure t
+ :mode ("\\.ini\\'" . conf-mode))
 
 (use-package yaml-mode
-  :ensure t
-  :mode ("\\.yml\\'" . yaml-mode)
-  :mode ("\\.yaml\\'" . yaml-mode))
+ :ensure t
+ :mode ("\\.yml\\'" . yaml-mode)
+ :mode ("\\.yaml\\'" . yaml-mode))
 
 (use-package json-mode
-  :ensure t
-  :mode ("\\.json\\'" . json-mode))
+ :ensure t
+ :mode ("\\.json\\'" . json-mode))
 
 ;; Web 支持
 (use-package web-mode
-  :ensure t)
+ :ensure t)
 (use-package emmet-mode
-  :ensure t)
+ :ensure t)
 (use-package js2-mode
-  :ensure t)
+ :ensure t)
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))  ;; HTML 文件
 (add-hook 'web-mode-hook  (lambda () (emmet-mode t)))
 (add-hook 'web-mode-hook
-          (lambda ()
-            (when (equal web-mode-content-type "javascript")
-              (js2-mode))))
+  (lambda ()
+    (when (equal web-mode-content-type "javascript")
+     (js2-mode))))
 
 (use-package cmake-mode
-  :ensure t)
+ :ensure t)
 
 (use-package cmake-ide
-  :ensure t)
+ :ensure t)
 (cmake-ide-setup)
 
 (use-package xclip
-  :ensure t)
+ :ensure t)
 
 (use-package autothemer
-  :ensure t)
+ :ensure t)
 
 (when (not (display-graphic-p))
-  (require 'xclip)
-  (xclip-mode 1))
+ (require 'xclip)
+ (xclip-mode 1))
 
 (provide 'init)
 ;;; init.el ends here
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

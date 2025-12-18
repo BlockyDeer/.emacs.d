@@ -1,6 +1,6 @@
 # AhogeEmacs
 
-My emacs configuration. It's very weak but it works.
+My emacs configuration.
 
 ## Installation
 
@@ -8,6 +8,9 @@ My emacs configuration. It's very weak but it works.
 cd ~
 rm -r ~/.emacs.d
 git clone https://github.com/BlockyDeer/.emacs.d
+cd ~/.emacs.d/
+git submodule init
+git submodule update
 ```
 
 Then open your emacs:
@@ -21,5 +24,5 @@ emacs
 the `ans-mode.el` in `~/.emacs.d` is not useful for common programming (I use it for some my own situations), you can remove it by the following steps:
 
 1. Delete the file `ans-mode.el` in `~/.emacs.d`.
-2. Remove the line `(load (expand-file-name "ans-mode.el" user-emacs-directory))` in the `init.el`.
+2. Remove the line `(load-el "ans-mode.el")` in the `init.el`.
    
