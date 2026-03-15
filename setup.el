@@ -9,6 +9,18 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 
+(defun find-config-file ()
+  (interactive)
+  (find-file "~/.emacs.d/init.el"))
+
+(defun dired-config-file ()
+  (interactive)
+  (dired "~/.emacs.d/"))
+
+(defun find-hypr-config-file ()
+  (interactive)
+  (find-file "~/.config/hypr/hyprland.conf"))
+
 ;; Setup use-package
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)

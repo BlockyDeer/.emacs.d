@@ -21,3 +21,4 @@ holo-layer
 history.el
 tree-sitter
 tramp
+/eshell/
