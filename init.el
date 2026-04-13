@@ -18,6 +18,8 @@
 
 (load-el "setup.el")
 
+(modify-syntax-entry ?_ "w")
+
                                         ; Source - https://stackoverflow.com/a/71785402
                                         ; Posted by Charles G
                                         ; Retrieved 2026-01-30, License - CC BY-SA 4.0
@@ -45,11 +47,17 @@
 (global-unset-key (kbd "C-h"))
 (global-set-key (kbd "C-h") 'backward-delete-char-untabify)
 
+(global-subword-mode 1)
+
 (use-package emacs
   :ensure nil
   :custom
   (indent-tabs-mode nil)
   (tab-width 8))
+
+(use-package elisp-mode
+  :ensure nil
+  :bind (("C-c C-f" . format-all-buffer)))
 
 (use-package compile
   :ensure nil
@@ -69,10 +77,15 @@
   (backup-by-copying t)
   (backup-directory-alist '(("." . "~/.emacs_backup/")))
   (delete-old-versions t)
-  (kept-new-versions 3)
+  (kept-new-versions 10)
   (kept-old-version 1)
   (version-control t)
   (auto-save-visited-interval 1))
+
+(use-package vc-hooks
+  :ensure nil
+  :custom
+  (vc-make-backend-files t))
 
 (use-package diminish
   :ensure t
@@ -103,6 +116,12 @@
 (use-package which-key
   :ensure t
   :config (which-key-mode t))
+
+(use-package expand-region
+  :ensure t
+  :bind
+  ("C-=" . er/expand-region)
+  ("C--" . er/contract-region))
 
 (use-package elec-pair
   :ensure nil
@@ -219,7 +238,9 @@
   :bind ("C-c C-f" . format-all-buffer)
   :config
   (setq-default format-all-formatters
-                '(("Rust" (rustfmt "--edition" "2024")))))
+                '(("Rust" (rustfmt "--edition" "2024"))
+                  ("JavaScript" (prettier))
+                  ("C++" (clang-format)))))
 
 
 (use-package cc-mode
@@ -245,13 +266,6 @@
 ;;  (highlight-indent-guides-auto-even-face-perc 30)
 ;;  (highlight-indent-guides-auto-odd-face-perc 25)
 ;;  (highlight-indent-guides-method 'character))  
-
-(use-package treemacs
-  :ensure t
-  :defer t)
-(global-set-key (kbd "<f8>") 'treemacs)
-
-(setq treemacs-show-hidden-files t)
 
 (use-package magit
   :ensure t)
@@ -285,14 +299,25 @@
   :mode ("\\.json\\'" . json-mode))
 
 ;; Web 支持
+(use-package css-mode
+  :ensure nil
+  :bind (("C-c C-f" . format-all-buffer)))
+
 (use-package emmet-mode
   :ensure t)
+
+(setq auto-mode-alist (assq-delete-all "\\.js\\'" auto-mode-alist))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 (use-package js2-mode
   :ensure t
+  :mode ("\\.js\\'" "\\.mjs\\'" "\\.cjs\\'")
+  :interpreter "node"
   :config
   (setq-default tab-width 2)
   (setq-default standard-indent 4)
-  (setq-default indent-tabs-mode nil))
+  (setq-default indent-tabs-mode nil)
+  :bind (("C-c C-f" . format-all-buffer)))
+
 (use-package jsdoc
   :ensure t)
 
@@ -361,18 +386,10 @@
      ("_Nginx" nginxfmt) ("_Snakemake" snakefmt)))
  '(js-indent-level 2)
  '(markdown-enable-math t)
- '(package-selected-packages
-   '(all-the-icons autothemer clang-format cmake-ide cmake-mode
-                   comment-tags company dashboard diminish dirvish
-                   dracula-theme eldoc-box emmet-mode format-all
-                   gdscript-mode glsl-mode gruber-darker-theme
-                   highlight-indent-guides impatient-mode ivy js2-mode
-                   jsdoc json-mode ligature lua-mode magit
-                   markdown-mode meson-mode mini-frame
-                   multiple-cursors rainbow-delimiters rainbow-mode
-                   rime rust-mode slime treemacs treesit-auto vlf
-                   vue-mode vue3-mode wc-mode wgsl-mode xclip
-                   yaml-mode yasnippet yasnippet-snippets))
+ '(package-selected-packages nil)
+ '(scheme-mit-dialect nil)
+ '(scheme-program-name "guile")
+ '(sql-product 'sqlite)
  '(whitespace-style
    '(face trailing tabs spaces newline missing-newline-at-eof empty
           indentation space-after-tab space-before-tab space-mark
