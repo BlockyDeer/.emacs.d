@@ -22,3 +22,6 @@ history.el
 tree-sitter
 tramp
 /eshell/
+/projectile-bookmarks.eld
+transient
+transient/

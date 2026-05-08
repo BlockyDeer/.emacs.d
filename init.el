@@ -42,7 +42,7 @@
 (load-theme 'dracula t)
 (load-el "font.el")
 ;;(set-global-fonts "FiraCode Nerd Font-16" "Noto Sans CJK SC" "Noto Color Emoji")
-(set-frame-font "Maple Mono Normal NF CN-14" nil t)
+(set-frame-font "Maple Mono Normal NF CN-12" nil t)
 
 (global-unset-key (kbd "C-h"))
 (global-set-key (kbd "C-h") 'backward-delete-char-untabify)
@@ -87,6 +87,11 @@
   :custom
   (vc-make-backend-files t))
 
+(use-package projectile
+  :ensure t
+  :config (projectile-mode +1)
+  :bind ("C-c p" . projectile-command-map))
+
 (use-package diminish
   :ensure t
   :config
@@ -127,16 +132,31 @@
   :ensure nil
   :config (electric-pair-mode t))
 
+(use-package display-fill-column-indicator
+  :ensure nil
+  :config (setq-default fill-column 80)
+  :hook (prog-mode . display-fill-column-indicator-mode))
+
 (use-package whitespace
   :ensure nil
   :config
   (global-whitespace-mode 1))
 
 
+(use-package pinyinlib
+  :ensure t
+  :config
+  (defun ivy--regex-pinyin (str)
+    (ivy--regex (pinyinlib-build-regexp-string str))))
 (use-package ivy
   :ensure t
   :diminish ivy-mode
-  :hook (after-init . ivy-mode))
+  :hook (after-init . ivy-mode)
+  :config
+  ;; 将 ivy--regex-pinyin 设置为 swiper 的正则表达式构建函数
+  (add-to-list 'ivy-re-builders-alist '(swiper . ivy--regex-pinyin))
+  (setq ivy-re-builders-alist
+        '((t . ivy--regex-pinyin))))
 
 (use-package avy
   :ensure t
@@ -155,9 +175,21 @@
   (put 'dired-find-alternate-file 'disabled nil)
   :hook
   (dired-mode . dired-hide-details-mode)
+  :custom
+  (dired-listing-switches "-alGhv --group-directories-first")
   :bind
   (:map dired-mode-map
         ("b" . dired-create-empty-file)))
+
+(use-package dired-rainbow
+  :ensure t)
+
+(use-package dired-collapse
+  :ensure t
+  :config (global-dired-collapse-mode))
+
+(use-package trashed
+  :ensure t)
 
 (load-el "ans-mode.el")
 (load-el "dashboard.el")
@@ -215,6 +247,7 @@
   (("C-c d" . eldoc-box-help-at-point)))
 
 (use-package treesit-auto
+  :if (not (eq system-type 'windows-nt))
   :ensure t
   :custom
   (treesit-auto-install 'prompt)
@@ -246,9 +279,9 @@
 (use-package cc-mode
   :ensure nil
   :bind (:map c-mode-map
-              ("C-c C-f" . 'clang-format-buffer)
+              ("C-c C-f" . 'format-all-buffer)
               :map c++-mode-map
-              ("C-c C-f" . 'clang-format-buffer)))
+              ("C-c C-f" . 'format-all-buffer)))
 
 (use-package gdscript-mode
   :ensure t)
@@ -276,10 +309,6 @@
   :bind ("C-c C-f" . 'format-all-buffer)
   :custom
   (format-all-formatters '(("Lua" (stylua)))))
-
-(use-package slime
-  :ensure t)
-(setq inferior-lisp-program "sbcl")
 
 (use-package markdown-mode
   :ensure t
@@ -316,17 +345,11 @@
   (setq-default tab-width 2)
   (setq-default standard-indent 4)
   (setq-default indent-tabs-mode nil)
-  :bind (("C-c C-f" . format-all-buffer)))
+  :bind
+  (:map js2-mode-map ("C-c C-f" . format-all-buffer)))
 
 (use-package jsdoc
   :ensure t)
-
-(use-package cmake-mode
-  :ensure t)
-
-(use-package cmake-ide
-  :ensure t)
-(cmake-ide-setup)
 
 (use-package xclip
   :ensure t)
@@ -347,56 +370,61 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("2d74de1cc32d00b20b347f2d0037b945a4158004f99877630afc034a674e3ab7"
-     default))
+   '("2d74de1cc32d00b20b347f2d0037b945a4158004f99877630afc034a674e3ab7" default))
+ '(doc-view-resolution 600)
  '(format-all-default-formatters
    '(("Assembly" asmfmt) ("ATS" atsfmt) ("Bazel" buildifier)
      ("BibTeX" emacs-bibtex) ("C" clang-format) ("C#" csharpier)
-     ("C++" clang-format) ("Cabal Config" cabal-fmt)
-     ("Clojure" zprint) ("CMake" cmake-format) ("Crystal" crystal)
-     ("CSS" prettier) ("Cuda" clang-format) ("D" dfmt)
-     ("Dart" dart-format) ("Dhall" dhall) ("Dockerfile" dockfmt)
-     ("Elixir" mix-format) ("Elm" elm-format)
+     ("C++" clang-format) ("Cabal Config" cabal-fmt) ("Clojure" zprint)
+     ("CMake" cmake-format) ("Crystal" crystal) ("CSS" prettier)
+     ("Cuda" clang-format) ("D" dfmt) ("Dart" dart-format) ("Dhall" dhall)
+     ("Dockerfile" dockfmt) ("Elixir" mix-format) ("Elm" elm-format)
      ("Emacs Lisp" emacs-lisp) ("Erlang" efmt) ("F#" fantomas)
-     ("Fish" fish-indent) ("Fortran Free Form" fprettify)
-     ("GLSL" clang-format) ("Go" gofmt) ("GraphQL" prettier)
-     ("Haskell" brittany) ("HCL" hclfmt) ("HLSL" clang-format)
-     ("HTML" html-tidy) ("HTML+EEX" mix-format)
-     ("HTML+ERB" erb-format) ("Hy" emacs-hy)
-     ("Java" google-java-format) ("JavaScript" prettier)
-     ("JSON" prettier) ("JSON5" prettier) ("Jsonnet" jsonnetfmt)
-     ("JSX" prettier) ("Kotlin" ktlint) ("LaTeX" latexindent)
-     ("Less" prettier) ("Literate Haskell" brittany) ("Lua" lua-fmt)
-     ("Markdown" prettier) ("Meson" muon-fmt) ("Nix" nixpkgs-fmt)
-     ("Objective-C" clang-format) ("OCaml" ocp-indent)
-     ("Perl" perltidy) ("PHP" prettier)
-     ("Protocol Buffer" clang-format) ("PureScript" purty)
-     ("Python" black) ("R" styler) ("Reason" bsrefmt)
+     ("Fish" fish-indent) ("Fortran Free Form" fprettify) ("GLSL" clang-format)
+     ("Go" gofmt) ("GraphQL" prettier) ("Haskell" brittany) ("HCL" hclfmt)
+     ("HLSL" clang-format) ("HTML" html-tidy) ("HTML+EEX" mix-format)
+     ("HTML+ERB" erb-format) ("Hy" emacs-hy) ("Java" google-java-format)
+     ("JavaScript" prettier) ("JSON" prettier) ("JSON5" prettier)
+     ("Jsonnet" jsonnetfmt) ("JSX" prettier) ("Kotlin" ktlint)
+     ("LaTeX" latexindent) ("Less" prettier) ("Literate Haskell" brittany)
+     ("Lua" lua-fmt) ("Markdown" prettier) ("Meson" muon-fmt)
+     ("Nix" nixpkgs-fmt) ("Objective-C" clang-format) ("OCaml" ocp-indent)
+     ("Perl" perltidy) ("PHP" prettier) ("Protocol Buffer" clang-format)
+     ("PureScript" purty) ("Python" black) ("R" styler) ("Reason" bsrefmt)
      ("ReScript" rescript) ("Ruby" rufo)
      ("Rust" (rustfmt "--edition 2024" "--style-edition 2024"))
-     ("Scala" scalafmt) ("SCSS" prettier) ("Shell" shfmt)
-     ("Solidity" prettier) ("SQL" sqlformat) ("Svelte" prettier)
-     ("Swift" swiftformat) ("Terraform" terraform-fmt)
-     ("TOML" prettier) ("TSX" prettier) ("TypeScript" prettier)
-     ("V" v-fmt) ("Verilog" istyle-verilog) ("Vue" prettier)
-     ("XML" html-tidy) ("YAML" prettier) ("Zig" zig)
-     ("_Angular" prettier) ("_AZSL" clang-format)
-     ("_Beancount" bean-format) ("_Caddyfile" caddy-fmt)
-     ("_Flow" prettier) ("_Gleam" gleam) ("_Ledger" ledger-mode)
-     ("_Nginx" nginxfmt) ("_Snakemake" snakefmt)))
+     ("Scala" scalafmt) ("SCSS" prettier) ("Shell" shfmt) ("Solidity" prettier)
+     ("SQL" sqlformat) ("Svelte" prettier) ("Swift" swiftformat)
+     ("Terraform" terraform-fmt) ("TOML" prettier) ("TSX" prettier)
+     ("TypeScript" prettier) ("V" v-fmt) ("Verilog" istyle-verilog)
+     ("Vue" prettier) ("XML" html-tidy) ("YAML" prettier) ("Zig" zig)
+     ("_Angular" prettier) ("_AZSL" clang-format) ("_Beancount" bean-format)
+     ("_Caddyfile" caddy-fmt) ("_Flow" prettier) ("_Gleam" gleam)
+     ("_Ledger" ledger-mode) ("_Nginx" nginxfmt) ("_Snakemake" snakefmt)))
  '(js-indent-level 2)
  '(markdown-enable-math t)
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(ace-window all-the-icons autothemer cfrs clang-format comment-tags company
+                dashboard diminish dired-collapse dired-rainbow dracula-theme
+                eglot eldoc-box emmet-mode expand-region format-all
+                gdscript-mode glsl-mode gruber-darker-theme
+                highlight-indent-guides ht htmlize hydra iscroll ivy js2-mode
+                jsdoc json-mode levenshtein ligature lua-mode magit
+                markdown-mode meson-mode mini-frame multiple-cursors pfuture
+                pinyinlib projectile rainbow-delimiters rainbow-mode rime
+                rust-mode simple-httpd trashed treesit-auto vlf vue-mode
+                vue3-mode wc-mode wgsl-mode xclip yaml-mode yasnippet-snippets))
  '(scheme-mit-dialect nil)
  '(scheme-program-name "guile")
  '(sql-product 'sqlite)
  '(whitespace-style
-   '(face trailing tabs spaces newline missing-newline-at-eof empty
-          indentation space-after-tab space-before-tab space-mark
-          tab-mark)))
+   '(face trailing tabs spaces newline missing-newline-at-eof empty indentation
+          space-after-tab space-before-tab space-mark tab-mark)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
