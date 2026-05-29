@@ -48,6 +48,7 @@
 (global-set-key (kbd "C-h") 'backward-delete-char-untabify)
 
 (global-subword-mode 1)
+(save-place-mode 1)
 
 (use-package emacs
   :ensure nil
@@ -57,7 +58,7 @@
 
 (use-package elisp-mode
   :ensure nil
-  :bind (("C-c C-f" . format-all-buffer)))
+  :bind (("C-c C-f" . apheleia-format-buffer)))
 
 (use-package compile
   :ensure nil
@@ -271,25 +272,28 @@
 (use-package clang-format
   :ensure t)
 
-(use-package format-all
-  :ensure t
-  :bind ("C-c C-f" . format-all-buffer)
-  :config
-  (setq-default format-all-formatters
-                '(("Rust" (rustfmt "--edition" "2024"))
-                  ("JavaScript" (prettier))
-                  ("C++" (clang-format))))
-  :hook
-  (js2-mode-hook . format-all-mode)
-  (c++-mode-hook . format-all-mode))
+;; (use-package format-all
+;;   :ensure t
+;;   :bind ("C-c C-f" . format-all-buffer)
+;;   :config
+;;   (setq-default format-all-formatters
+;;                 '(("Rust" (rustfmt "--edition" "2024"))
+;;                   ("JavaScript" (prettier))
+;;                   ("C++" (clang-format))))
+;;   :hook
+;;   (js2-mode-hook . format-all-mode)
+;;   (c++-mode-hook . format-all-mode))
 
+(use-package apheleia
+  :ensure t
+  :config (apheleia-global-mode +1))
 
 (use-package cc-mode
   :ensure nil
   :bind (:map c-mode-map
-              ("C-c C-f" . 'format-all-buffer)
+              ("C-c C-f" . 'apheleia-format-buffer)
               :map c++-mode-map
-              ("C-c C-f" . 'format-all-buffer)))
+              ("C-c C-f" . 'apheleia-format-buffer)))
 
 (use-package gdscript-mode
   :ensure t)
@@ -319,7 +323,7 @@
 
 (use-package lua-mode
   :ensure t
-  :bind ("C-c C-f" . 'format-all-buffer)
+  :bind ("C-c C-f" . 'apheleia-format-buffer)
   :custom
   (format-all-formatters '(("Lua" (stylua)))))
 
@@ -343,7 +347,7 @@
 ;; Web 支持
 (use-package css-mode
   :ensure nil
-  :bind (("C-c C-f" . format-all-buffer)))
+  :bind (("C-c C-f" . apheleia-format-buffer)))
 
 (use-package emmet-mode
   :ensure t)
@@ -358,7 +362,7 @@
   (setq-default standard-indent 4)
   (setq-default indent-tabs-mode nil)
   :bind
-  (:map js2-mode-map ("C-c C-f" . format-all-buffer)))
+  (:map js2-mode-map ("C-c C-f" . apheleia-format-buffer)))
 
 (use-package jsdoc
   :ensure t)
@@ -381,33 +385,29 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(auto-save-visited-interval 5 nil nil "Customized with use-package files")
  '(custom-safe-themes
    '("2d74de1cc32d00b20b347f2d0037b945a4158004f99877630afc034a674e3ab7" default))
  '(doc-view-resolution 600)
  '(js-indent-level 2)
  '(markdown-enable-math t)
  '(package-selected-packages
-   '(ace-window all-the-icons autothemer cfrs clang-format comment-tags company
-                dashboard diminish dired-collapse dired-rainbow dracula-theme
-                eldoc-box emmet-mode expand-region format-all gdscript-mode
-                glsl-mode gruber-darker-theme highlight-indent-guides ht htmlize
-                hydra iscroll ivy ivy-prescient js2-mode jsdoc json-mode
-                kotlin-mode levenshtein ligature lua-mode magit markdown-mode
-                meson-mode mini-frame multiple-cursors pfuture pinyinlib
-                projectile rainbow-delimiters rainbow-mode rime rust-mode
-                simple-httpd trashed treesit-auto vlf vue-mode vue3-mode wc-mode
-                wgsl-mode xclip yaml-mode yasnippet-snippets))
+   '(ace-window all-the-icons apheleia autothemer cfrs clang-format comment-tags
+                company dashboard diminish dired-collapse dired-rainbow
+                dracula-theme eldoc-box emmet-mode expand-region format-all
+                gdscript-mode glsl-mode gruber-darker-theme
+                highlight-indent-guides ht htmlize hydra iscroll ivy
+                ivy-prescient js2-mode jsdoc json-mode kotlin-mode levenshtein
+                ligature lua-mode magit markdown-mode meson-mode mini-frame
+                multiple-cursors pfuture pinyinlib projectile rainbow-delimiters
+                rainbow-mode rime rust-mode simple-httpd trashed treesit-auto
+                vlf vue-mode vue3-mode wc-mode wgsl-mode xclip yaml-mode
+                yasnippet-snippets))
  '(scheme-mit-dialect nil)
  '(scheme-program-name "guile")
  '(sql-product 'sqlite)
  '(whitespace-style
    '(face trailing tabs spaces newline missing-newline-at-eof empty indentation
           space-after-tab space-before-tab space-mark tab-mark)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
