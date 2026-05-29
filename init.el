@@ -157,6 +157,10 @@
   (add-to-list 'ivy-re-builders-alist '(swiper . ivy--regex-pinyin))
   (setq ivy-re-builders-alist
         '((t . ivy--regex-pinyin))))
+(use-package ivy-prescient
+  :ensure t
+  :config
+  (ivy-prescient-mode t))
 
 (use-package avy
   :ensure t
@@ -222,7 +226,8 @@
          (c-mode . eglot-ensure)
          (typescript-ts-mode . eglot-ensure)
          (gdscript-mode . eglot-ensure)
-         (rust-mode . eglot-ensure))
+         (rust-mode . eglot-ensure)
+         (js2-mode . eglot-ensure))
   :config
   (setq eglot-semantic-token-faces
         '(("macro" . font-lock-macro-face)))
@@ -246,13 +251,13 @@
   :bind
   (("C-c d" . eldoc-box-help-at-point)))
 
-(use-package treesit-auto
-  :if (not (eq system-type 'windows-nt))
-  :ensure t
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (global-treesit-auto-mode))
+;; (use-package treesit-auto
+;;   :if (not (eq system-type 'windows-nt))
+;;   :ensure t
+;;   :custom
+;;   (treesit-auto-install 'prompt)
+;;   :config
+;;   (global-treesit-auto-mode))
 
 (use-package meson-mode
   :ensure t)
@@ -273,7 +278,10 @@
   (setq-default format-all-formatters
                 '(("Rust" (rustfmt "--edition" "2024"))
                   ("JavaScript" (prettier))
-                  ("C++" (clang-format)))))
+                  ("C++" (clang-format))))
+  :hook
+  (js2-mode-hook . format-all-mode)
+  (c++-mode-hook . format-all-mode))
 
 
 (use-package cc-mode
@@ -303,6 +311,11 @@
 (use-package magit
   :ensure t)
 (global-set-key (kbd "<f5>") 'magit-status)
+
+(use-package magit-todos
+  :after magit
+  :ensure t
+  :config (magit-todos-mode 1))
 
 (use-package lua-mode
   :ensure t
@@ -335,7 +348,6 @@
 (use-package emmet-mode
   :ensure t)
 
-(setq auto-mode-alist (assq-delete-all "\\.js\\'" auto-mode-alist))
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 (use-package js2-mode
   :ensure t
@@ -372,48 +384,19 @@
  '(custom-safe-themes
    '("2d74de1cc32d00b20b347f2d0037b945a4158004f99877630afc034a674e3ab7" default))
  '(doc-view-resolution 600)
- '(format-all-default-formatters
-   '(("Assembly" asmfmt) ("ATS" atsfmt) ("Bazel" buildifier)
-     ("BibTeX" emacs-bibtex) ("C" clang-format) ("C#" csharpier)
-     ("C++" clang-format) ("Cabal Config" cabal-fmt) ("Clojure" zprint)
-     ("CMake" cmake-format) ("Crystal" crystal) ("CSS" prettier)
-     ("Cuda" clang-format) ("D" dfmt) ("Dart" dart-format) ("Dhall" dhall)
-     ("Dockerfile" dockfmt) ("Elixir" mix-format) ("Elm" elm-format)
-     ("Emacs Lisp" emacs-lisp) ("Erlang" efmt) ("F#" fantomas)
-     ("Fish" fish-indent) ("Fortran Free Form" fprettify) ("GLSL" clang-format)
-     ("Go" gofmt) ("GraphQL" prettier) ("Haskell" brittany) ("HCL" hclfmt)
-     ("HLSL" clang-format) ("HTML" html-tidy) ("HTML+EEX" mix-format)
-     ("HTML+ERB" erb-format) ("Hy" emacs-hy) ("Java" google-java-format)
-     ("JavaScript" prettier) ("JSON" prettier) ("JSON5" prettier)
-     ("Jsonnet" jsonnetfmt) ("JSX" prettier) ("Kotlin" ktlint)
-     ("LaTeX" latexindent) ("Less" prettier) ("Literate Haskell" brittany)
-     ("Lua" lua-fmt) ("Markdown" prettier) ("Meson" muon-fmt)
-     ("Nix" nixpkgs-fmt) ("Objective-C" clang-format) ("OCaml" ocp-indent)
-     ("Perl" perltidy) ("PHP" prettier) ("Protocol Buffer" clang-format)
-     ("PureScript" purty) ("Python" black) ("R" styler) ("Reason" bsrefmt)
-     ("ReScript" rescript) ("Ruby" rufo)
-     ("Rust" (rustfmt "--edition 2024" "--style-edition 2024"))
-     ("Scala" scalafmt) ("SCSS" prettier) ("Shell" shfmt) ("Solidity" prettier)
-     ("SQL" sqlformat) ("Svelte" prettier) ("Swift" swiftformat)
-     ("Terraform" terraform-fmt) ("TOML" prettier) ("TSX" prettier)
-     ("TypeScript" prettier) ("V" v-fmt) ("Verilog" istyle-verilog)
-     ("Vue" prettier) ("XML" html-tidy) ("YAML" prettier) ("Zig" zig)
-     ("_Angular" prettier) ("_AZSL" clang-format) ("_Beancount" bean-format)
-     ("_Caddyfile" caddy-fmt) ("_Flow" prettier) ("_Gleam" gleam)
-     ("_Ledger" ledger-mode) ("_Nginx" nginxfmt) ("_Snakemake" snakefmt)))
  '(js-indent-level 2)
  '(markdown-enable-math t)
  '(package-selected-packages
    '(ace-window all-the-icons autothemer cfrs clang-format comment-tags company
                 dashboard diminish dired-collapse dired-rainbow dracula-theme
-                eglot eldoc-box emmet-mode expand-region format-all
-                gdscript-mode glsl-mode gruber-darker-theme
-                highlight-indent-guides ht htmlize hydra iscroll ivy js2-mode
-                jsdoc json-mode levenshtein ligature lua-mode magit
-                markdown-mode meson-mode mini-frame multiple-cursors pfuture
-                pinyinlib projectile rainbow-delimiters rainbow-mode rime
-                rust-mode simple-httpd trashed treesit-auto vlf vue-mode
-                vue3-mode wc-mode wgsl-mode xclip yaml-mode yasnippet-snippets))
+                eldoc-box emmet-mode expand-region format-all gdscript-mode
+                glsl-mode gruber-darker-theme highlight-indent-guides ht htmlize
+                hydra iscroll ivy ivy-prescient js2-mode jsdoc json-mode
+                kotlin-mode levenshtein ligature lua-mode magit markdown-mode
+                meson-mode mini-frame multiple-cursors pfuture pinyinlib
+                projectile rainbow-delimiters rainbow-mode rime rust-mode
+                simple-httpd trashed treesit-auto vlf vue-mode vue3-mode wc-mode
+                wgsl-mode xclip yaml-mode yasnippet-snippets))
  '(scheme-mit-dialect nil)
  '(scheme-program-name "guile")
  '(sql-product 'sqlite)
