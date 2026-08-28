@@ -47,8 +47,15 @@
 (global-unset-key (kbd "C-h"))
 (global-set-key (kbd "C-h") 'backward-delete-char-untabify)
 
+(when (display-graphic-p)
+  (global-unset-key (kbd "C-z")))
+
 (global-subword-mode 1)
 (save-place-mode 1)
+
+(use-package grep
+  :ensure nil
+  :bind ("C-c s" . rgrep))
 
 (use-package emacs
   :ensure nil
@@ -301,7 +308,9 @@
 (use-package display-line-numbers
   :ensure nil
   :hook
-  ((text-mode-hook prog-mode-hook conf-mode-hook) . display-line-numbers-mode))
+  ((text-mode-hook . display-line-numbers-mode)
+   (prog-mode-hook . display-line-numbers-mode)
+   (text-mode-hook . display-line-numbers-mode)))
 
 ;; (use-package highlight-indent-guides
 ;;  :ensure t
@@ -321,15 +330,32 @@
   :ensure t
   :config (magit-todos-mode 1))
 
+(defun asm-indent ()
+  "Customize asm-mode indentation for 65816 assembly."
+  (defun asm-calculate-indentation ()
+    (or
+     (and (looking-at "[.@_[:word:]]+:") 0)
+     (and (looking-at "\\s<\\s<\\s<") 0)
+     (and (looking-at "\\.[a-zA-Z]+") 0)
+     (and (looking-at "\\s<\\(\\S<\\|\\'\\)") comment-column)
+     (or (car tab-stop-list) tab-width))))
+
+(use-package asm-mode
+  :hook (asm-mode . asm-indent))
+
 (use-package lua-mode
   :ensure t
   :bind ("C-c C-f" . 'apheleia-format-buffer)
   :custom
   (format-all-formatters '(("Lua" (stylua)))))
 
+(use-package texfrag
+  :ensure t)
+
 (use-package markdown-mode
   :ensure t
-  :mode "\\.md\\'")
+  :mode "\\.md\\'"
+  :hook (markdown-mode-hook . texfrag-mode))
 
 (use-package conf-mode
   :ensure t
@@ -348,6 +374,8 @@
 (use-package css-mode
   :ensure nil
   :bind (("C-c C-f" . apheleia-format-buffer)))
+
+(load-el "vue-mode.el")
 
 (use-package emmet-mode
   :ensure t)
@@ -400,14 +428,25 @@
                 ivy-prescient js2-mode jsdoc json-mode kotlin-mode levenshtein
                 ligature lua-mode magit markdown-mode meson-mode mini-frame
                 multiple-cursors pfuture pinyinlib projectile rainbow-delimiters
-                rainbow-mode rime rust-mode simple-httpd trashed treesit-auto
-                vlf vue-mode vue3-mode wc-mode wgsl-mode xclip yaml-mode
+                rainbow-mode rime rust-mode simple-httpd srfi texfrag trashed
+                typescript-mode vlf vue3-mode wc-mode wgsl-mode xclip yaml-mode
                 yasnippet-snippets))
  '(scheme-mit-dialect nil)
  '(scheme-program-name "guile")
  '(sql-product 'sqlite)
+ '(texfrag-setup-alist
+   '((texfrag-html html-mode) (texfrag-eww eww-mode) (texfrag-sx sx-question-mode)
+     (texfrag-prog prog-mode) (texfrag-trac-wiki trac-wiki-mode)
+     (texfrag-markdown markdown-mode) (texfrag-org org-mode)
+     (texfrag-adoc adoc-mode) (markdown-mode)))
  '(whitespace-style
    '(face trailing tabs spaces newline missing-newline-at-eof empty indentation
           space-after-tab space-before-tab space-mark tab-mark)))
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

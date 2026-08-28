@@ -26,3 +26,8 @@ tramp
 history.el
 *.lock
 /places
+/c3-ts-mode/
+/games/
+/history
+/todo/
+
