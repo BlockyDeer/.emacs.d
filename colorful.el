@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 (use-package comment-tags
   :ensure t)
 (setq comment-tags-keymap-prefix (kbd "C-c t"))

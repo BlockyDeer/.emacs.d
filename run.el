@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 ;; 定义一个全局变量来存储用户设置的 Bash 命令
 (defvar run-command-var nil
   "The Bash command to run when F7 is pressed.")

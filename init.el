@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 ;;; commentary: 我的emacs配置 -- init.el
 
 ;;; Code:
@@ -17,6 +18,11 @@
 (setq minibuffer-frame-alist nil)
 
 (load-el "setup.el")
+
+(use-package mouse
+  :bind (("M-<down-mouse-1>" . nil)
+         ("M-<mouse-1>" . nil)
+         ("M-<drag-mouse-1>" . nil)))
 
 (modify-syntax-entry ?_ "w")
 
@@ -375,6 +381,8 @@
   :ensure nil
   :bind (("C-c C-f" . apheleia-format-buffer)))
 
+(use-package web-mode
+  :ensure t)
 (load-el "vue-mode.el")
 
 (use-package emmet-mode
@@ -432,7 +440,7 @@
                 typescript-mode vlf vue3-mode wc-mode wgsl-mode xclip yaml-mode
                 yasnippet-snippets))
  '(scheme-mit-dialect nil)
- '(scheme-program-name "guile")
+ '(scheme-program-name "env LD_LIBRARY_PATH=/usr/local/lib/ chibi-scheme")
  '(sql-product 'sqlite)
  '(texfrag-setup-alist
    '((texfrag-html html-mode) (texfrag-eww eww-mode) (texfrag-sx sx-question-mode)

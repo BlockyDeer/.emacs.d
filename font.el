@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 (defun set-global-fonts (monospace-font-string chinese-font-name emoji-font-name)
   "Set the global fonts."
   (set-frame-font monospace-font-string nil t)

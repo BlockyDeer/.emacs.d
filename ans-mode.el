@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 ;;; ans-mode.el - 自定义 ans 文件模式
 
 ;;; Code:
