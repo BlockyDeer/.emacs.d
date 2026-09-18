@@ -27,7 +27,9 @@ history.el
 *.lock
 /places
 /c3-ts-mode/
+/pretty-lambdada/
 /games/
 /history
 /todo/
 
+/projectile-frecency.eld

@@ -12,9 +12,8 @@
   ("--decorate" "--graph")
   ("-n256" "--graph" "--decorate")
   ("-n256" "--graph" "--color" "--decorate"))
- (magit-merge
-  ("--ff-only")
-  nil)
+ (magit-merge nil
+              ("--ff-only"))
  (magit-push
   ("--force")
   nil)
@@ -25,6 +24,7 @@
  (magit-remote
   ("-f"))
  (magit-reset nil)
+ (magit-run nil)
  (magit-stash nil
               ("--include-untracked"))
  (magit-submodule nil)

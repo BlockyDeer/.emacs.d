@@ -215,6 +215,41 @@
 (load-el "colorful.el")
 (load-el "run.el")
 
+(load-el "scheme-ts-mode.el")
+(use-package scheme-ts-mode
+  :ensure nil
+  :mode (("\\.scm\\'" . scheme-ts-mode)
+         ("\\.ss\\'" . scheme-ts-mode)
+         ("\\.sch\\'" . scheme-ts-mode)
+         ("\\.sld\\'" . scheme-ts-mode)
+         ("\\.sls\\'" . scheme-ts-mode))
+  :init
+  (add-to-list 'treesit-extra-load-path
+               (expand-file-name "tree-sitter" user-emacs-directory)))
+
+(use-package geiser
+  :ensure t
+  :custom
+  (geiser-active-implementations '(chicken))
+  (geiser-chibi-binary "/home/blockydeer/start-chibi.sh"))
+
+(use-package geiser-chibi
+  :ensure t)
+
+(use-package geiser-chicken
+  :ensure t)
+
+;; Display the word `lambda' as the Greek letter in Lisp modes.
+;; Source: https://github.com/emacsmirror/pretty-lambdada (vendored, not in MELPA)
+(use-package pretty-lambdada
+  :ensure nil
+  :load-path (lambda ()
+               (expand-file-name "pretty-lambdada" user-emacs-directory))
+  :config
+  ;; For all buffers instead, replace the line below with:
+  ;; (global-pretty-lambda-mode 1)
+  (pretty-lambda-for-modes))
+
 (use-package find-file
   :ensure nil
   :bind ("C-c o" . ff-find-other-file))
@@ -431,14 +466,14 @@
    '(ace-window all-the-icons apheleia autothemer cfrs clang-format comment-tags
                 company dashboard diminish dired-collapse dired-rainbow
                 dracula-theme eldoc-box emmet-mode expand-region format-all
-                gdscript-mode glsl-mode gruber-darker-theme
-                highlight-indent-guides ht htmlize hydra iscroll ivy
-                ivy-prescient js2-mode jsdoc json-mode kotlin-mode levenshtein
-                ligature lua-mode magit markdown-mode meson-mode mini-frame
-                multiple-cursors pfuture pinyinlib projectile rainbow-delimiters
-                rainbow-mode rime rust-mode simple-httpd srfi texfrag trashed
-                typescript-mode vlf vue3-mode wc-mode wgsl-mode xclip yaml-mode
-                yasnippet-snippets))
+                gdscript-mode geiser geiser-chibi geiser-chicken glsl-mode
+                gruber-darker-theme highlight-indent-guides ht htmlize hydra
+                iscroll ivy ivy-prescient js2-mode jsdoc json-mode kotlin-mode
+                levenshtein ligature lua-mode magit markdown-mode meson-mode
+                mini-frame multiple-cursors pfuture pinyinlib projectile
+                rainbow-delimiters rainbow-mode rime rust-mode simple-httpd srfi
+                texfrag trashed typescript-mode vlf vue3-mode wc-mode wgsl-mode
+                xclip yaml-mode yasnippet-snippets))
  '(scheme-mit-dialect nil)
  '(scheme-program-name "env LD_LIBRARY_PATH=/usr/local/lib/ chibi-scheme")
  '(sql-product 'sqlite)
