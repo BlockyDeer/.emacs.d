@@ -104,14 +104,8 @@
 (use-package projectile
   :ensure t
   :config (projectile-mode +1)
-  :bind ("C-c p" . projectile-command-map))
-
-(use-package diminish
-  :ensure t
-  :config
-  (diminish 'ivy-mode)
-  (diminish 'yas-global-mode)
-  (diminish 'company-mode))
+  :bind ("C-c p" . projectile-command-map)
+  :custom (projectile-mode-line-prefix " Proj"))
 
 (use-package vlf
   :ensure t
@@ -131,6 +125,16 @@
   (default-input-method "rime")
   :bind
   ("C-`" . 'rime-send-keybinding))
+
+(use-package dsh-emacs
+  :load-path "~/dsh-emacs"
+  :commands (dsh-emacs dsh-emacs-new-session)
+  :custom
+  (dsh-emacs-base-url "http://127.0.0.1:3080") ; server address
+  (dsh-emacs-default-preset "code")           ; preset for new sessions
+  (dsh-emacs-server-start-on-init t)          ; start the server eagerly
+  :bind (:map dsh-emacs-mode-map
+              ("C-c C-a" . dsh-emacs-attach-file)))
 
 (use-package which-key
   :ensure t
@@ -164,7 +168,6 @@
     (ivy--regex (pinyinlib-build-regexp-string str))))
 (use-package ivy
   :ensure t
-  :diminish ivy-mode
   :hook (after-init . ivy-mode)
   :config
   ;; 将 ivy--regex-pinyin 设置为 swiper 的正则表达式构建函数
@@ -448,6 +451,16 @@
   (require 'xclip)
   (xclip-mode 1))
 
+(setq mode-line-collapse-minor-modes '(auto-revert-mode
+                                       company-mode
+                                       yas-minor-mode
+                                       ivy-mode
+                                       rainbow-mode
+                                       eldoc-mode
+                                       whitespace-mode
+                                       which-key-mode
+                                       subword-mode))
+
 (provide 'init)
 ;;; init.el ends here
 
@@ -460,11 +473,12 @@
  '(custom-safe-themes
    '("2d74de1cc32d00b20b347f2d0037b945a4158004f99877630afc034a674e3ab7" default))
  '(doc-view-resolution 600)
+ '(dsh-emacs-server-auth-token "Glpjg4TIlxX6pao9DiV-utrWi8hVLvGhtdzy6WyRPpo")
  '(js-indent-level 2)
  '(markdown-enable-math t)
  '(package-selected-packages
    '(ace-window all-the-icons apheleia autothemer cfrs clang-format comment-tags
-                company dashboard diminish dired-collapse dired-rainbow
+                company dashboard dired-collapse dired-rainbow
                 dracula-theme eldoc-box emmet-mode expand-region format-all
                 gdscript-mode geiser geiser-chibi geiser-chicken glsl-mode
                 gruber-darker-theme highlight-indent-guides ht htmlize hydra
