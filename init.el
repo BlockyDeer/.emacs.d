@@ -19,6 +19,22 @@
 
 (load-el "setup.el")
 
+(use-package package
+  :ensure nil
+  :custom
+  (package-selected-packages
+   '(ace-window all-the-icons apheleia autothemer cfrs clang-format comment-tags
+                company dashboard dired-collapse dired-rainbow dracula-theme
+                eldoc-box emmet-mode expand-region format-all gdscript-mode
+                geiser geiser-chibi geiser-chicken glsl-mode gruber-darker-theme
+                highlight-indent-guides ht htmlize hydra iscroll ivy
+                ivy-prescient js2-mode jsdoc json-mode kotlin-mode levenshtein
+                ligature lua-mode magit markdown-mode meson-mode mini-frame
+                multiple-cursors pfuture pinyinlib projectile racket-mode
+                rainbow-delimiters rainbow-mode rime rust-mode simple-httpd srfi
+                texfrag trashed typescript-mode vlf vue3-mode wc-mode wgsl-mode
+                xclip yaml-mode yasnippet-snippets)))
+
 (use-package mouse
   :bind (("M-<down-mouse-1>" . nil)
          ("M-<mouse-1>" . nil)
@@ -44,7 +60,10 @@
 ;; General Configuration
 ;; Theme and font
 (use-package dracula-theme
-  :ensure t)
+  :ensure t
+  :custom
+  (custom-safe-themes
+   '("2d74de1cc32d00b20b347f2d0037b945a4158004f99877630afc034a674e3ab7" default)))
 (load-theme 'dracula t)
 (load-el "font.el")
 ;;(set-global-fonts "FiraCode Nerd Font-16" "Noto Sans CJK SC" "Noto Color Emoji")
@@ -69,6 +88,13 @@
   (indent-tabs-mode nil)
   (tab-width 8))
 
+(use-package simple
+  :ensure nil
+  :config
+  ;; These commands are disabled by default in Emacs.
+  (put 'upcase-region 'disabled nil)
+  (put 'downcase-region 'disabled nil))
+
 (use-package elisp-mode
   :ensure nil
   :bind (("C-c C-f" . apheleia-format-buffer)))
@@ -92,14 +118,26 @@
   (backup-directory-alist '(("." . "~/.emacs_backup/")))
   (delete-old-versions t)
   (kept-new-versions 10)
-  (kept-old-version 1)
+  (kept-old-versions 1)
   (version-control t)
-  (auto-save-visited-interval 1))
+  (auto-save-visited-interval 5))
 
 (use-package vc-hooks
   :ensure nil
   :custom
   (vc-make-backend-files t))
+
+(use-package doc-view
+  :ensure nil
+  :defer t
+  :custom
+  (doc-view-resolution 600))
+
+(use-package sql
+  :ensure nil
+  :defer t
+  :custom
+  (sql-product 'sqlite))
 
 (use-package projectile
   :ensure t
@@ -133,6 +171,7 @@
   (dsh-emacs-base-url "http://127.0.0.1:3080") ; server address
   (dsh-emacs-default-preset "code")           ; preset for new sessions
   (dsh-emacs-server-start-on-init t)          ; start the server eagerly
+  (dsh-emacs-server-auth-token "Glpjg4TIlxX6pao9DiV-utrWi8hVLvGhtdzy6WyRPpo")
   :bind (:map dsh-emacs-mode-map
               ("C-c C-a" . dsh-emacs-attach-file)))
 
@@ -158,7 +197,11 @@
 (use-package whitespace
   :ensure nil
   :config
-  (global-whitespace-mode 1))
+  (global-whitespace-mode 1)
+  :custom
+  (whitespace-style
+   '(face trailing tabs spaces newline missing-newline-at-eof empty indentation
+          space-after-tab space-before-tab space-mark tab-mark)))
 
 
 (use-package pinyinlib
@@ -241,6 +284,13 @@
 
 (use-package geiser-chicken
   :ensure t)
+
+(use-package scheme
+  :ensure nil
+  :defer t
+  :custom
+  (scheme-mit-dialect nil)
+  (scheme-program-name "env LD_LIBRARY_PATH=/usr/local/lib/ chibi-scheme"))
 
 (use-package racket-mode
   :ensure t
@@ -537,12 +587,20 @@ electric commands are disabled."
   (format-all-formatters '(("Lua" (stylua)))))
 
 (use-package texfrag
-  :ensure t)
+  :ensure t
+  :custom
+  (texfrag-setup-alist
+   '((texfrag-html html-mode) (texfrag-eww eww-mode) (texfrag-sx sx-question-mode)
+     (texfrag-prog prog-mode) (texfrag-trac-wiki trac-wiki-mode)
+     (texfrag-markdown markdown-mode) (texfrag-org org-mode)
+     (texfrag-adoc adoc-mode) (markdown-mode))))
 
 (use-package markdown-mode
   :ensure t
   :mode "\\.md\\'"
-  :hook (markdown-mode-hook . texfrag-mode))
+  :hook (markdown-mode-hook . texfrag-mode)
+  :custom
+  (markdown-enable-math t))
 
 (use-package conf-mode
   :ensure t
@@ -578,6 +636,8 @@ electric commands are disabled."
   (setq-default tab-width 2)
   (setq-default standard-indent 4)
   (setq-default indent-tabs-mode nil)
+  :custom
+  (js-indent-level 2)
   :bind
   (:map js2-mode-map ("C-c C-f" . apheleia-format-buffer)))
 
@@ -607,49 +667,3 @@ electric commands are disabled."
 
 (provide 'init)
 ;;; init.el ends here
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(auto-save-visited-interval 5 nil nil "Customized with use-package files")
- '(custom-safe-themes
-   '("2d74de1cc32d00b20b347f2d0037b945a4158004f99877630afc034a674e3ab7" default))
- '(doc-view-resolution 600)
- '(dsh-emacs-server-auth-token "Glpjg4TIlxX6pao9DiV-utrWi8hVLvGhtdzy6WyRPpo")
- '(js-indent-level 2)
- '(lsp-ui-doc-position 'top)
- '(lsp-ui-doc-side 'right)
- '(markdown-enable-math t)
- '(package-selected-packages
-   '(ace-window all-the-icons apheleia autothemer cfrs clang-format comment-tags
-                company dashboard dired-collapse dired-rainbow dracula-theme
-                eldoc-box emmet-mode expand-region format-all gdscript-mode
-                geiser geiser-chibi geiser-chicken glsl-mode gruber-darker-theme
-                highlight-indent-guides ht htmlize hydra iscroll ivy
-                ivy-prescient js2-mode jsdoc json-mode kotlin-mode levenshtein
-                ligature lua-mode magit markdown-mode meson-mode mini-frame
-                multiple-cursors pfuture pinyinlib projectile racket-mode
-                rainbow-delimiters rainbow-mode rime rust-mode simple-httpd srfi
-                texfrag trashed typescript-mode vlf vue3-mode wc-mode wgsl-mode
-                xclip yaml-mode yasnippet-snippets))
- '(scheme-mit-dialect nil)
- '(scheme-program-name "env LD_LIBRARY_PATH=/usr/local/lib/ chibi-scheme")
- '(sql-product 'sqlite)
- '(texfrag-setup-alist
-   '((texfrag-html html-mode) (texfrag-eww eww-mode) (texfrag-sx sx-question-mode)
-     (texfrag-prog prog-mode) (texfrag-trac-wiki trac-wiki-mode)
-     (texfrag-markdown markdown-mode) (texfrag-org org-mode)
-     (texfrag-adoc adoc-mode) (markdown-mode)))
- '(whitespace-style
-   '(face trailing tabs spaces newline missing-newline-at-eof empty indentation
-          space-after-tab space-before-tab space-mark tab-mark)))
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
