@@ -233,7 +233,7 @@
 (use-package geiser
   :ensure t
   :custom
-  (geiser-active-implementations '(chicken))
+  (geiser-active-implementations '(chicken racket chibi))
   (geiser-chibi-binary "/home/blockydeer/start-chibi.sh"))
 
 (use-package geiser-chibi
@@ -241,6 +241,10 @@
 
 (use-package geiser-chicken
   :ensure t)
+
+(use-package racket-mode
+  :ensure t
+  :mode ("\\.rkt\\'" . racket-mode))
 
 ;; Display the word `lambda' as the Greek letter in Lisp modes.
 ;; Source: https://github.com/emacsmirror/pretty-lambdada (vendored, not in MELPA)
@@ -251,7 +255,9 @@
   :config
   ;; For all buffers instead, replace the line below with:
   ;; (global-pretty-lambda-mode 1)
-  (pretty-lambda-for-modes))
+  (pretty-lambda-for-modes)
+  :hook
+  (racket-mode . pretty-lambda-mode))
 
 (use-package find-file
   :ensure nil
@@ -271,37 +277,104 @@
 (yas-global-mode t)
 
 ;; LSP
-(use-package eglot
-  :ensure t
-  :hook ((go-mode . eglot-ensure)
-         (c++-mode . eglot-ensure)
-         (c-mode . eglot-ensure)
-         (typescript-ts-mode . eglot-ensure)
-         (gdscript-mode . eglot-ensure)
-         (rust-mode . eglot-ensure)
-         (js2-mode . eglot-ensure))
-  :config
-  (setq eglot-semantic-token-faces
-        '(("macro" . font-lock-macro-face)))
-  (add-to-list 'eglot-server-programs
-               '((rust-ts-mode rust-mode) . ("rust-analyzer" 
-                                             :initializationOptions (:cargo (:buildScripts (:enable t))))))
-  :bind
-  (:map eglot-mode-map
-        ("C-c C-r" . 'eglot-rename)
-        ("C-c C-i" . 'eglot-code-actions)))
+;; (use-package eglot
+;;   :ensure t
+;;   :hook ((go-mode . eglot-ensure)
+;;          (c++-mode . eglot-ensure)
+;;          (c-mode . eglot-ensure)
+;;          (typescript-ts-mode . eglot-ensure)
+;;          (gdscript-mode . eglot-ensure)
+;;          (rust-mode . eglot-ensure)
+;;          (js2-mode . eglot-ensure))
+;;   :config
+;;   (setq eglot-semantic-token-faces
+;;         '(("macro" . font-lock-macro-face)))
+;;   (add-to-list 'eglot-server-programs
+;;                '((rust-ts-mode rust-mode) . ("rust-analyzer" 
+;;                                              :initializationOptions (:cargo (:buildScripts (:enable t))))))
+;;   :bind
+;;   (:map eglot-mode-map
+;;         ("C-c C-r" . 'eglot-rename)
+;;         ("C-c C-i" . 'eglot-code-actions)))
 
-(use-package eldoc
-  :init
-  (setq eldoc-display-functions
-        '(eldoc-display-in-buffer)))
+;; Source: https://gist.github.com/casouri/919088eb45114086e69a147be92a8d89
+;; Author: casouri
+(defun moon-flymake-mode-line ()
+  (let* ((known (hash-table-keys flymake--backend-state))
+         (running (flymake-running-backends))
+         (disabled (flymake-disabled-backends))
+         (reported (flymake-reporting-backends))
+         (diags-by-type (make-hash-table))
+         (all-disabled (and disabled (null running)))
+         (some-waiting (cl-set-difference running reported)))
+    (maphash (lambda (_b state)
+               (mapc (lambda (diag)
+                       (push diag
+                             (gethash (flymake--diag-type diag)
+                                      diags-by-type)))
+                     (flymake--backend-state-diags state)))
+             flymake--backend-state)
+    (apply #'concat
+           (mapcar (lambda (args)
+                     (apply (lambda (num str face)
+                              (propertize
+                               (format str num) 'face face))
+                            args))
+                   `((,(length (gethash :error diags-by-type)) "E%d " error)
+                     (,(length (gethash :warning diags-by-type)) "W%d " warning)
+                     (,(length (gethash :note diags-by-type)) "N%d" success))))))
 
-(use-package eldoc-box
+(use-package flymake
+  :ensure nil
+  :custom
+  (flymake-mode-line-format '(moon-flymake-mode-line)))
+
+(use-package lsp-mode
   :ensure t
-  :after eldoc
-  :commands (eldoc-box-help-at-point)
+  :hook ((c++-mode . (lambda ()
+                       (unless (derived-mode-p 'wgsl-mode)
+                         (lsp-deferred))))
+         (lsp-mode . lsp-enable-which-key-integration)
+         (racket-mode . lsp-deferred))
+  :custom
+  (lsp-headerline-breadcrumb-enable nil)
+  (lsp-modeline-code-actions-enable nil)
+  (lsp-enable-on-type-formatting nil)
   :bind
-  (("C-c d" . eldoc-box-help-at-point)))
+  ("C-c C-r" . lsp-rename)
+  ("C-c i" . lsp-execute-code-action)
+  :commands lsp)
+
+(use-package flycheck
+  :ensure t)
+
+(use-package lsp-ui
+  :ensure t
+  :custom
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-position 'top)
+  (lsp-ui-doc-side 'right)
+  :bind
+  ("C-c d d" . lsp-ui-doc-show)
+  ("C-c d f" . lsp-ui-doc-focus-frame))
+
+(use-package lsp-ivy
+  :ensure t
+  :bind
+  ("M-g s" . lsp-ivy-workspace-symbol)
+  ("M-g S" . lsp-ivy-global-workspace-symbol))
+
+;; (use-package eldoc
+;;   :init
+;;   (setq eldoc-display-functions
+;;         '(eldoc-display-in-buffer)))
+
+;; (use-package eldoc-box
+;;   :ensure t
+;;   :after eldoc
+;;   :commands (eldoc-box-help-at-point))
 
 ;; (use-package treesit-auto
 ;;   :if (not (eq system-type 'windows-nt))
@@ -337,7 +410,13 @@
 
 (use-package apheleia
   :ensure t
-  :config (apheleia-global-mode +1))
+  :config
+  (apheleia-global-mode +1)
+  ;; wgsl-mode derives from c++-mode, so apheleia's `c++-mode' entry
+  ;; (clang-format) would otherwise be applied to .wgsl buffers and reformat
+  ;; them with C++ style.  A nil entry means "no formatter" and stops the
+  ;; more general C++/cc-mode entries from matching.
+  (add-to-list 'apheleia-mode-alist '(wgsl-mode)))
 
 (use-package cc-mode
   :ensure nil
@@ -345,6 +424,70 @@
               ("C-c C-f" . 'apheleia-format-buffer)
               :map c++-mode-map
               ("C-c C-f" . 'apheleia-format-buffer)))
+
+;;; WGSL indentation -- begin
+;; `wgsl-mode' is derived from `c++-mode', so cc-mode's C++ rules are applied
+;; to WGSL and misparse it: `position: vec4f,' reads as a C++ access label, so
+;; `,' and `;' reindent the line by an extra level.  In addition cc-mode puts
+;; `c-indent-region' on `indent-region-function', and its electric commands
+;; call `c-indent-line' directly -- both bypass `indent-line-function'.
+;; So use a brace-depth indenter and switch cc-mode's electric reindent off.
+;; (tab-width/standard-indent have no effect here; cc-mode only consults
+;; `c-basic-offset' and `c-offsets-alist'.)
+
+(use-package wgsl-mode
+  :ensure t)
+
+(defcustom wgsl-indent-offset 4
+  "Indentation per nesting level in `wgsl-mode' buffers."
+  :type 'integer
+  :group 'editing)
+
+(defun wgsl--nesting-depth ()
+  "Return the WGSL nesting depth at the start of the current line."
+  (save-excursion
+    (beginning-of-line)
+    (let ((depth (car (syntax-ppss))))
+      (back-to-indentation)
+      ;; A line that starts with a closer sits one level further out.
+      (when (or (looking-at "}") (looking-at "\\]") (looking-at ")"))
+        (setq depth (max 0 (1- depth))))
+      depth)))
+
+(defun wgsl-indent-line ()
+  "Indent the current line by WGSL nesting depth.
+See `wgsl-indent-offset'."
+  (interactive)
+  (let ((indent (* wgsl-indent-offset (wgsl--nesting-depth))))
+    (if (<= (current-column) (current-indentation))
+        (indent-line-to indent)
+      ;; Point was past the indentation; keep it there.
+      (save-excursion (indent-line-to indent)))))
+
+(defun wgsl-insert-closer (arg)
+  "Insert ARG closing delimiters, then reindent the line.
+Keeps `}])' snapping to the right level now that cc-mode's own
+electric commands are disabled."
+  (interactive "*p")
+  (self-insert-command arg)
+  (wgsl-indent-line))
+
+(defun wgsl-mode-indent-setup ()
+  "Make `wgsl-mode' indent by brace depth instead of cc-mode's C++ rules."
+  (setq-local indent-tabs-mode nil)
+  (setq-local indent-line-function #'wgsl-indent-line)
+  ;; cc-mode's `c-indent-region' would otherwise be used by `indent-region'.
+  (setq-local indent-region-function nil)
+  ;; cc-mode's electric commands reindent through `c-indent-line', which
+  ;; ignores `indent-line-function'; this makes `,' and `;' plain inserts.
+  (setq-local c-electric-flag nil)
+  (keymap-set wgsl-mode-map "}" #'wgsl-insert-closer)
+  (keymap-set wgsl-mode-map ")" #'wgsl-insert-closer)
+  (keymap-set wgsl-mode-map "]" #'wgsl-insert-closer))
+
+(add-hook 'wgsl-mode-hook #'wgsl-mode-indent-setup)
+;;; WGSL indentation -- end
+
 
 (use-package gdscript-mode
   :ensure t)
@@ -459,7 +602,8 @@
                                        eldoc-mode
                                        whitespace-mode
                                        which-key-mode
-                                       subword-mode))
+                                       subword-mode
+                                       abbrev-mode))
 
 (provide 'init)
 ;;; init.el ends here
@@ -475,16 +619,18 @@
  '(doc-view-resolution 600)
  '(dsh-emacs-server-auth-token "Glpjg4TIlxX6pao9DiV-utrWi8hVLvGhtdzy6WyRPpo")
  '(js-indent-level 2)
+ '(lsp-ui-doc-position 'top)
+ '(lsp-ui-doc-side 'right)
  '(markdown-enable-math t)
  '(package-selected-packages
    '(ace-window all-the-icons apheleia autothemer cfrs clang-format comment-tags
-                company dashboard dired-collapse dired-rainbow
-                dracula-theme eldoc-box emmet-mode expand-region format-all
-                gdscript-mode geiser geiser-chibi geiser-chicken glsl-mode
-                gruber-darker-theme highlight-indent-guides ht htmlize hydra
-                iscroll ivy ivy-prescient js2-mode jsdoc json-mode kotlin-mode
-                levenshtein ligature lua-mode magit markdown-mode meson-mode
-                mini-frame multiple-cursors pfuture pinyinlib projectile
+                company dashboard dired-collapse dired-rainbow dracula-theme
+                eldoc-box emmet-mode expand-region format-all gdscript-mode
+                geiser geiser-chibi geiser-chicken glsl-mode gruber-darker-theme
+                highlight-indent-guides ht htmlize hydra iscroll ivy
+                ivy-prescient js2-mode jsdoc json-mode kotlin-mode levenshtein
+                ligature lua-mode magit markdown-mode meson-mode mini-frame
+                multiple-cursors pfuture pinyinlib projectile racket-mode
                 rainbow-delimiters rainbow-mode rime rust-mode simple-httpd srfi
                 texfrag trashed typescript-mode vlf vue3-mode wc-mode wgsl-mode
                 xclip yaml-mode yasnippet-snippets))

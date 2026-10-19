@@ -14,9 +14,8 @@
   ("-n256" "--graph" "--color" "--decorate"))
  (magit-merge nil
               ("--ff-only"))
- (magit-push
-  ("--force")
-  nil)
+ (magit-push nil
+             ("--force"))
  (magit-rebase
   ("--autostash")
   nil
